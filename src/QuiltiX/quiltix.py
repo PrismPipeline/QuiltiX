@@ -89,7 +89,6 @@ class QuiltiXWindow(QMainWindow):
             "materials",
             "Tiles_Black_Long_Variative_1k_8b",
             "Tiles_Black_Long_Variative.mtlx",
-            # "standard_surface.mtlx"
         )
         if not os.path.exists(mx_file):
             return
