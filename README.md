@@ -66,7 +66,8 @@ Overview over the most important Environment Variables:
 | Environment Variable | Purpose | Variable Type | Example |
 |-|-|-|-|
 | PXR_PLUGINPATH_NAME | Paths to Hydra delegate plugins | Paths | |
-| PXR_MTLX_STDLIB_SEARCH_PATHS | Paths to custom MaterialX node definition locations | Paths | |
+| PXR_MTLX_STDLIB_SEARCH_PATHS | Paths to standard MaterialX node definition locations | Paths | |
+| PXR_MTLX_PLUGIN_SEARCH_PATHS | Paths to custom MaterialX node definition locations | Paths | |
 | HD_DEFAULT_RENDERER | Name of the default Hydra delegate for the viewport | String | GL |
 
 Additional information and instructions can be found below.
@@ -88,18 +89,40 @@ To register a Hydra renderer plugin the Hydra plugin directory of the renderer n
 Below is a non-exhaustive list of install instructions for Hydra renderers. The USD Working group also has a good collection of available hydra delegates available [here](https://wiki.aswf.io/display/WGUSD/USD+Projects+and+Resources#USDProjectsandResources-Hydra)
 * [Arnold](https://github.com/Autodesk/arnold-usd#building-and-installation)
 
-#### Changing the default Hydra delegate
+Arnold
+
+To use Arnold in Quiltix, the Arnold 7.2.1.0 SDK needs to be downloaded from here:
+https://arnoldrenderer.com/download/product-download/?id=5408
+
+Extract it and make sure that the "Arnold-7.2.1.0-windows" folder is in the same folder as the Quiltix folder.
+
+
+Karma
+
+QuiltiX can be opened in an Houdini environment to use the Karma Hydra delegate in QuiltiX. Run the following commands in the hython executable, which is part of Houdini.
+
+```
+cd QUILTIX_ROOT
+set PYTHONPATH=%PYTHONPATH%;./src
+C:\Program Files\Side Effects Software\Houdini 19.5.640\bin\hython -c "from QuiltiX import quiltix;quiltix.launch()"
+``````
+
+It is possible to use additional Hydra delegates, which are available in the Houdini environment.
+
+#### Changing the active Hydra delegate
 The default Hydra delegate can be changed by setting the `HD_DEFAULT_RENDERER` environment variable to the preferred renderer.
 
 ```shell
 HD_DEFAULT_RENDERER="GL"
 ``````
 
+After opening QuiltiX the active Hydra delegate can be changed in the "View" -> "Set Renderer" menu.
+
 
 
 ### Adding custom MaterialX Node definitions
 
-To add custom MaterialX node defintions they can be added by adding the location of the node definition files to the `PXR_MTLX_STLIB_SEARCH_PATHS` environment variable.
+To add custom MaterialX node defintions they can be added by adding the location of the node definition files to the `PXR_MTLX_PLUGIN_SEARCH_PATHS` environment variable.
 
 
 ## Contributing

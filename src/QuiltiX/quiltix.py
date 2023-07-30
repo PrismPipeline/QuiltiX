@@ -347,7 +347,7 @@ class QuiltiXWindow(QMainWindow):
 
         # region View
         if self.viewer_enabled:
-            self.menu_set_current_renderer = QMenu("&Set renderer", self)
+            self.menu_set_current_renderer = QMenu("&Set Renderer", self)
             self.grp_set_current_renderer = QActionGroup(self, exclusive=True)
             self.grp_set_current_renderer.triggered.connect(
                 lambda action: self.stage_view_widget.set_current_renderer_by_name(action.text())
