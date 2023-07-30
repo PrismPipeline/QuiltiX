@@ -18,18 +18,33 @@ QuiltiX is a graphical node editor to edit, and author [MaterialX](https://mater
 
 - [Requirements](#requirements)
 - [Installation](#installation)
+  - [From PyPi](#from-pypi)
+  - [From Source](#from-source)
 - [Running QuiltiX](#running-quiltix)
+  - [Running QuiltiX using hython](#running-quiltix-using-hython)
 - [Integrating with your environment](#integrating-with-your-environment)
   - [Adding Hydra delegates](#adding-hydra-delegates)
-    - [Changing the default Hydra delegate](#changing-the-default-hydra-delegate)
+    - [Arnold](#arnold)
+    - [Karma](#karma)
   - [Adding custom MaterialX Node definitions](#adding-custom-materialx-node-definitions)
 - [Contributing](#contributing)
 - [License](#license)
 
 ## Requirements
-Quiltix requires Python 3.9+ as well as compiled versions of USD and MaterialX.
+QuiltiX requires Python 3.9+ as well as compiled versions of USD and MaterialX.
 
 ## Installation
+### From PyPi
+
+```shell
+pip install QuiltiX
+```
+
+If you additionally require pre-built binaries for MaterialX & USD:
+```shell
+pip install QuiltiX[cppdeps]
+```
+### From Source
 1) Clone the repository
 
 ```
@@ -39,21 +54,18 @@ cd QuiltiX
 
 2) Install the dependencies
 
-Here you have couple of options.
-
-This will install the base python dependencies, excluding any development dependencies and MaterialX + USD
+This will install the base python dependencies, excluding any development dependencies, MaterialX & USD
 
 ```
 pip install -e . 
 ```
 
+<details>
+  <summary>Additional install options</summary>
 If you want to just install everything (Python dependencies, dev dependencies, MaterialX & USD)
 ```
 pip install -e .[all]
 ```
-
-<details>
-  <summary>Additional install options</summary>
 
 These are the additional install options available
 ```
@@ -67,6 +79,31 @@ For more information see [pyproject.toml](pyproject.toml)
 
 python -m QuiltiX 
 
+### Running QuiltiX using hython
+
+QuiltiX can be run from `hython`, which is Houdini's python executable. This way you can use Houdini's built USD and MaterialX and don't have to worry about providing your own.  
+You will also be able to use Render delegates for Houdini like Karma. Read more in the [Karma](#karma) section.
+
+<details>
+  <summary>Hython instructions</summary>
+You will still need some additional libraries required by QuiltiX, so it is still necessary to install the dependencies mentioned in [Installation](#installation).  
+You can then execute QuiltiX while making sure that both QuiltiX and its python dependencies are in the `PYTHONPATH` environmenv variable:
+```shell
+cd QuiltiX_root
+set PYTHONPATH=%PYTHONPATH%;./src;/path/to/python/dependencies
+/path/to/hython.exe -c "from QuiltiX import quiltix;quiltix.launch()"
+```
+
+Or if you have a virtual environment
+```shell
+cd QuiltiX_root
+/path/to/venv/Scripts/activate
+set PYTHONPATH=%PYTHONPATH%;%VIRTUAL_ENV%;./src
+/path/to/hython.exe -c "from QuiltiX import quiltix;quiltix.launch()"
+```
+> Note that currently both the Storm as well as HoudiniGL render delegates do not seem to work in QuiltiX when being launched from hython.
+</details>
+
 ## Integrating with your environment
 QuiltiX tries to rely as much as possible on pre-existing environment variables from MaterialX/USD to extend its systems.
 
@@ -77,8 +114,6 @@ Overview over the most important Environment Variables:
 | PXR_MTLX_STDLIB_SEARCH_PATHS | Paths to standard MaterialX node definition locations | Paths | |
 | PXR_MTLX_PLUGIN_SEARCH_PATHS | Paths to custom MaterialX node definition locations | Paths | |
 | HD_DEFAULT_RENDERER | Name of the default Hydra delegate for the viewport | String | GL |
-
-Additional information and instructions can be found below.
 
 ### Adding [Hydra delegates](https://openusd.org/release/glossary.html#hydra)
 > **_NOTE_**  
@@ -94,35 +129,40 @@ The [Storm Hydra Delegate](https://openusd.org/dev/api/hd_storm_page_front.html)
 
 To register a Hydra renderer plugin the Hydra plugin directory of the renderer needs to be added to the `PXR_PLUGINPATH_NAME` environment variable. Generally renderers also need their binaries added to the `PATH` enviornment variable, but there might be additional variables for licensing or additional features.  
 
-Below is a non-exhaustive list of install instructions for Hydra renderers. The USD Working group also has a good collection of available hydra delegates available [here](https://wiki.aswf.io/display/WGUSD/USD+Projects+and+Resources#USDProjectsandResources-Hydra)
-* [Arnold](https://github.com/Autodesk/arnold-usd#building-and-installation)
+Below is a non-exhaustive list of install instructions for Hydra renderers.
 
-Arnold
+#### Arnold
 
-To use Arnold in Quiltix, the Arnold 7.2.1.0 SDK needs to be downloaded from here:
-https://arnoldrenderer.com/download/product-download/?id=5408
-
-Extract it and make sure that the "Arnold-7.2.1.0-windows" folder is in the same folder as the Quiltix folder.
+To use Arnold in QuiltiX we require 
+* [Arnold SDK](https://arnoldrenderer.com/download/#arnold-sdk)
+* A compiled version of [arnold-usd](https://github.com/Autodesk/arnold-usd)
 
 
-Karma
+<details>
+  <summary>Full Arnold install instructions</summary>
 
-QuiltiX can be opened in an Houdini environment to use the Karma Hydra delegate in QuiltiX. Run the following commands in the hython executable, which is part of Houdini.
+The SDK (v7.2.1.0) can be downloaded from [here](https://arnoldrenderer.com/download/product-download/?id=5408). Extract it to a favoured directory.  
+To install a compiled version of arnold-usd one can download it from [here](#TODO)(v7.2.1.0) or install from [source](https://github.com/Autodesk/arnold-usd)
 
-```
-cd QUILTIX_ROOT
-set PYTHONPATH=%PYTHONPATH%;./src
-C:\Program Files\Side Effects Software\Houdini 19.5.640\bin\hython -c "from QuiltiX import quiltix;quiltix.launch()"
-``````
+Afterward couple of enviornment variables need to be set
+```shell
+set PATH=%PATH%;SDK_EXTRACT_DIR/bin
+set PXR_PLUGINPATH_NAME=%PXR_PLUGINPATH_NAME%;ARNOLD_USD_DIR/plugin
+``` 
+
+</details>
+
+#### Karma
+To run Karma you need to execute QuiltiX from [hython](#running-quiltix-using-hython).
 
 It is possible to use additional Hydra delegates, which are available in the Houdini environment.
 
-#### Changing the active Hydra delegate
+#### Changing the active Hydra delegate <!-- omit from toc -->
 The default Hydra delegate can be changed by setting the `HD_DEFAULT_RENDERER` environment variable to the preferred renderer.
 
 ```shell
-HD_DEFAULT_RENDERER="GL"
-``````
+set HD_DEFAULT_RENDERER="GL"
+```
 
 After opening QuiltiX the active Hydra delegate can be changed in the "View" -> "Set Renderer" menu.
 
