@@ -88,6 +88,7 @@ You will also be able to use Render delegates for Houdini like Karma. Read more 
 
 <details>
   <summary>Hython instructions</summary>
+
 You will still need some additional libraries required by QuiltiX, so it is still necessary to install the dependencies mentioned in [Installation](#installation).  
 You can then execute QuiltiX while making sure that both QuiltiX and its python dependencies are in the `PYTHONPATH` environmenv variable:
 ```shell
