@@ -337,6 +337,11 @@ class QuiltiXWindow(QMainWindow):
         self.act_apply_mat.setChecked(True)
         self.options_menu.addAction(self.act_apply_mat)
 
+        self.act_ng_abstraction = QAction("Auto create Nodegraph around shader inputs", self)
+        self.act_ng_abstraction.setCheckable(True)
+        self.act_ng_abstraction.setChecked(True)
+        self.options_menu.addAction(self.act_ng_abstraction)
+
         self.act_validate = QAction("Validate MaterialX document...", self)
         self.act_validate.triggered.connect(self.validate)
         self.options_menu.addAction(self.act_validate)

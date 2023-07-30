@@ -23,6 +23,7 @@ class QxNodeGraphViewer(NodeGraphQt.widgets.viewer.NodeViewer):
         self.graph = node_graph
 
     def on_data_dropped(self, data, pos):
+        img_count = 0
         for url in data.urls():
             local_path = url.toLocalFile()
             if os.path.isdir(local_path):
@@ -35,7 +36,8 @@ class QxNodeGraphViewer(NodeGraphQt.widgets.viewer.NodeViewer):
             elif local_path.endswith(".mtlx"):
                 self.graph.load_graph_from_mx_file(local_path)
             elif os.path.splitext(local_path)[1] in [".jpg", ".png", ".jpeg", ".exr", ".tif"]:
-                self.graph.load_image_file(local_path)
+                self.graph.load_image_file(local_path, yoffset=300*img_count)
+                img_count += 1
 
     def sceneMouseMoveEvent(self, event):
         # paint valid color indicator when dragging a connection and hovering over port of other node
