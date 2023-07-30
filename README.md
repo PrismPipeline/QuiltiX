@@ -62,6 +62,7 @@ pip install -e .
 
 <details>
   <summary>Additional install options</summary>
+
 If you want to just install everything (Python dependencies, dev dependencies, MaterialX & USD)
 ```
 pip install -e .[all]
