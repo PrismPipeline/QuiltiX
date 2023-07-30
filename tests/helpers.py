@@ -13,8 +13,8 @@ def quiltix_instance(load_shaderball=True, load_default_graph=False):
     The context manager handles ui setup and teardown.
 
     Args:
-        load_shaderball (bool, optional): Start Quiltix with a Shaderball. Defaults to True.
-        load_default_graph (bool, optional): Start Quiltix with a default graph. Defaults to False.
+        load_shaderball (bool, optional): Start QuiltiX with a Shaderball. Defaults to True.
+        load_default_graph (bool, optional): Start QuiltiX with a default graph. Defaults to False.
 
     Yields:
         QuiltiXWindow: Instance of the QuiltiXWindow class.
