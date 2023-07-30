@@ -65,9 +65,9 @@ all = ["QuiltiX[usd,materialx,dev,build,pypi]"]
 
 
 [project.urls]
-"Homepage" = "https://github.com/RichardFrangenberg/QuiltiX"
-"Bug Reports" = "https://github.com/RichardFrangenberg/QuiltiX/issues"
-"Source" = "https://github.com/RichardFrangenberg/QuiltiX"
+"Homepage" = "https://github.com/PrismPipeline/QuiltiX"
+"Bug Reports" = "https://github.com/PrismPipeline/QuiltiX/issues"
+"Source" = "https://github.com/PrismPipeline/QuiltiX"
 
 [build-system]
 requires = ["setuptools>=61.0.0", "setuptools-scm"]
