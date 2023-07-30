@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<materialx version="1.38">
+  <nodegraph name="NG">
+    <constant name="RoughnessMin" type="float">
+      <input name="value" type="float" value="0" />
+    </constant>
+    <constant name="RoughnessMax" type="float">
+      <input name="value" type="float" value="1" />
+    </constant>
+    <texcoord name="Texcoord" type="vector2">
+      <input name="index" type="integer" value="0" />
+    </texcoord>
+    <constant name="UVScale" type="float">
+      <input name="value" type="float" value="2" />
+    </constant>
+    <multiply name="Multiply_001" type="vector2">
+      <input name="in1" type="vector2" nodename="Texcoord" />
+      <input name="in2" type="float" nodename="UVScale" />
+    </multiply>
+    <image name="Image_002" type="float">
+      <input name="default" type="float" value="0" />
+      <input name="texcoord" type="vector2" nodename="Multiply_001" />
+      <input name="file" type="filename" value="textures\Black_Upholstery_roughness.png" />
+      <input name="layer" type="string" value="" />
+      <input name="uaddressmode" type="string" value="periodic" />
+      <input name="vaddressmode" type="string" value="periodic" />
+      <input name="filtertype" type="string" value="linear" />
+      <input name="framerange" type="string" value="" />
+      <input name="frameoffset" type="integer" value="0" />
+      <input name="frameendaction" type="string" value="constant" />
+    </image>
+    <mix name="Mix" type="float">
+      <input name="fg" type="float" nodename="RoughnessMin" />
+      <input name="bg" type="float" nodename="RoughnessMax" />
+      <input name="mix" type="float" nodename="Image_002" />
+    </mix>
+    <image name="Image_001" type="float">
+      <input name="default" type="float" value="0" />
+      <input name="texcoord" type="vector2" nodename="Multiply_001" />
+      <input name="file" type="filename" value="textures\Black_Upholstery_height.png" />
+      <input name="layer" type="string" value="" />
+      <input name="uaddressmode" type="string" value="periodic" />
+      <input name="vaddressmode" type="string" value="periodic" />
+      <input name="filtertype" type="string" value="linear" />
+      <input name="framerange" type="string" value="" />
+      <input name="frameoffset" type="integer" value="0" />
+      <input name="frameendaction" type="string" value="constant" />
+    </image>
+    <constant name="SheenAmount" type="float">
+      <input name="value" type="float" value="0.3" />
+    </constant>
+    <multiply name="Multiply" type="float">
+      <input name="in1" type="float" nodename="Mix" />
+      <input name="in2" type="float" nodename="SheenAmount" />
+    </multiply>
+    <multiply name="Multiply_002" type="float">
+      <input name="in1" type="float" nodename="Image_001" />
+      <input name="in2" type="float" nodename="Multiply" />
+    </multiply>
+    <image name="Image_003" type="vector3">
+      <input name="default" type="vector3" value="0.5, 0.5, 1" />
+      <input name="texcoord" type="vector2" nodename="Multiply_001" />
+      <input name="file" type="filename" value="textures\Black_Upholstery_normal.png" />
+      <input name="layer" type="string" value="" />
+      <input name="uaddressmode" type="string" value="periodic" />
+      <input name="vaddressmode" type="string" value="periodic" />
+      <input name="filtertype" type="string" value="linear" />
+      <input name="framerange" type="string" value="" />
+      <input name="frameoffset" type="integer" value="0" />
+      <input name="frameendaction" type="string" value="constant" />
+    </image>
+    <normalmap name="Normalmap" type="vector3">
+      <input name="in" type="vector3" nodename="Image_003" />
+      <input name="scale" type="float" value="1" />
+      <input name="space" type="string" value="tangent" />
+    </normalmap>
+    <output name="out_Mix" type="float" nodename="Mix" />
+    <output name="out_Multiply_002" type="float" nodename="Multiply_002" />
+    <output name="out_Normalmap" type="vector3" nodename="Normalmap" />
+  </nodegraph>
+  <standard_surface name="standard_surface_1" type="surfaceshader">
+    <input name="base" type="float" value="1" />
+    <input name="base_color" type="color3" value="0, 0, 0" />
+    <input name="diffuse_roughness" type="float" value="0.5" />
+    <input name="metalness" type="float" value="0" />
+    <input name="specular" type="float" value="0.5" />
+    <input name="specular_color" type="color3" value="1, 1, 1" />
+    <input name="specular_roughness" type="float" nodegraph="NG" output="out_Mix" />
+    <input name="specular_IOR" type="float" value="1.45" />
+    <input name="specular_anisotropy" type="float" value="0" />
+    <input name="specular_rotation" type="float" value="0" />
+    <input name="sheen" type="float" nodegraph="NG" output="out_Multiply_002" />
+    <input name="sheen_color" type="color3" value="0.301879, 0.301879, 0.301879" />
+    <input name="sheen_roughness" type="float" value="0.5" />
+    <input name="opacity" type="color3" value="1, 1, 1" />
+    <input name="thin_walled" type="boolean" value="false" />
+    <input name="normal" type="vector3" nodegraph="NG" output="out_Normalmap" />
+  </standard_surface>
+  <surfacematerial name="Black_Upholstery" type="material">
+    <input name="surfaceshader" type="surfaceshader" nodename="standard_surface_1" />
+  </surfacematerial>
+</materialx>

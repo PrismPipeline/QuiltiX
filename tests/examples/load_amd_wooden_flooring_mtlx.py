@@ -12,8 +12,8 @@ def load_amd_wooden_flooring_mtlx():
             "QuiltiX",
             "resources",
             "materials",
-            "Wooden_Flooring_004_1k_8b",
-            "Wooden_Flooring_SHDR.mtlx",
+            "Mahogany_Chevron_Flooring_1k_8b",
+            "Mahogany_Chevron_Flooring.mtlx",
         )
         # TODO: why do we not have to assign the material here?
         editor.qx_node_graph.load_graph_from_mx_file(mx_file)

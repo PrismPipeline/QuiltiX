@@ -1,6 +1,14 @@
-<img align="left" width="70" height="70" padding=5 src="src/QuiltiX/resources/icons/quiltix-logo-x.png"> 
+<p align="center">
+  <img src="media/quiltix-logo-full.svg" height="170" />
+</p>
 
-# QuiltiX  <!-- omit from toc -->
+----  
+
+<div align="center">
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/PrismPipeline/QuiltiX/LICENSE)
+[![Version](https://img.shields.io/github/v/release/PrismPipeline/QuiltiX/releases)](https://github.com/PrismPipeline/QuiltiX/releases/latest)
+</div>
 
 QuiltiX is a graphical node editor to edit, and author [MaterialX](https://materialx.org/) based materials of 3D assets. It includes a viewport based on [OpenUSD](https://www.openusd.org/release/index.html)'s [Hydra](https://openusd.org/release/glossary.html#hydra), which enables viewing your assets in any renderer supporting both Hydra & MaterialX.
 
@@ -25,7 +33,7 @@ Quiltix requires Python 3.9+ as well as compiled versions of USD and MaterialX.
 1) Clone the repository
 
 ```
-git clone https://github.com/RichardFrangenberg/QuiltiX.git
+git clone https://github.com/PrismPipeline/QuiltiX.git
 cd QuiltiX
 ```
 

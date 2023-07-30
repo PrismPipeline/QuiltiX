@@ -87,8 +87,9 @@ class QuiltiXWindow(QMainWindow):
             "QuiltiX",
             "resources",
             "materials",
-            "Wooden_Flooring_004_1k_8b",
-            "Wooden_Flooring_SHDR.mtlx",
+            "Tiles_Black_Long_Variative_1k_8b",
+            "Tiles_Black_Long_Variative.mtlx",
+            # "standard_surface.mtlx"
         )
         if not os.path.exists(mx_file):
             return
@@ -97,6 +98,7 @@ class QuiltiXWindow(QMainWindow):
 
     def load_shaderball(self):
         stage_file = os.path.join(ROOT, "src", "QuiltiX", "resources", "geometry", "matx_shaderball_uv.usdc")
+        # stage_file = os.path.join(ROOT, "src", "QuiltiX", "resources", "geometry", "StandardShaderBall", "layers", "shaderball.usda")
         stage = usd_stage.get_stage_from_file(stage_file)
         self.stage_ctrl.set_stage(stage)
 
@@ -559,7 +561,7 @@ class QuiltiXWindow(QMainWindow):
 
         message_box_texts = [
             f"<p>Version: {self._version}<p><p>&nbsp;</p>",
-            "<p><a href='https://github.com/RichardFrangenberg/QuiltiX' style='color:#ffffff;'>Homepage...</a></p>",
+            "<p><a href='https://github.com/PrismPipeline/QuiltiX' style='color:#ffffff;'>Homepage...</a></p>",
             "<p><a href='https://github.com/prismpipeline/QuiltiX/LICENSE' style='color:#ffffff;'>License...</a></p>",
             "<p>© Manuel Köster and Richard Frangenberg</p>"
         ]

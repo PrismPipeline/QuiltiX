@@ -1,6 +1,7 @@
 import os
 import re
 from pathlib import Path
+import sys
 
 import MaterialX as mx  # type: ignore
 
@@ -9,14 +10,26 @@ class MxStdLibNotFoundError(Exception):
     def __init__(self):
         super().__init__("Could not find MaterialX StdLib")
 
+def is_mx_version_higher_than(major, minor, patch):
+    mx_major, x_minor, mx_patch = mx.getVersionIntegers()
+    if mx_major < major:
+        return False
+    if x_minor < minor:
+        return False
+    if mx_patch < patch:
+        return False
+    return True
 
 def get_mx_stdlib_paths():
     """Get the path to the stdlib of MaterialX definitions. This directory is the parent of the "libraries" directory
     containing the stdlib namespaces.
 
     1) Use PXR_MTLX_STDLIB_SEARCH_PATHS
-    2) Search in pxr python lib (this might include USD specific node defs)
-    3) Search in mx python lib
+    2) Search for Houdini's default stdlib location if called from Hython
+    3) Use mx.getDefaultDataSearchPath() for MaterialX versions > 1.38.7
+    4) Search in pxr python lib (this might include USD specific node defs)
+    5) Search in mx python lib
+    6) Give up and cry
 
     Returns:
         list(str): List of MaterialX stdlib paths
@@ -36,6 +49,13 @@ def get_mx_stdlib_paths():
         paths = [os.path.normpath(path) for path in stdlib_env.split(os.pathsep) if path]
         paths = list(set(paths))
         return paths
+
+    # Deal with quiltix being called from hython
+    if Path(sys.executable).stem == "hython":
+        return [Path(Path(sys.executable).parent.parent, "houdini", "materialx").as_posix()]
+
+    if is_mx_version_higher_than(1, 38, 7):
+        return [mx.getDefaultDataSearchPath()]
 
     import pxr  # type: ignore
     if pxr_stdlib := recurse_find_mx_stdlib_in_dir(os.path.dirname(pxr.__file__)):
