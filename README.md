@@ -77,7 +77,9 @@ For more information see [pyproject.toml](pyproject.toml)
 
 ## Running QuiltiX
 
+```
 python -m QuiltiX 
+```
 
 ### Running QuiltiX using hython
 
@@ -153,7 +155,7 @@ set PXR_PLUGINPATH_NAME=%PXR_PLUGINPATH_NAME%;ARNOLD_USD_DIR/plugin
 </details>
 
 #### Karma
-To run Karma you need to execute QuiltiX from [hython](#running-quiltix-using-hython).
+To run Karma you need to execute QuiltiX from hython. See [here](#running-quiltix-using-hython) for more information.
 
 It is possible to use additional Hydra delegates, which are available in the Houdini environment.
 
