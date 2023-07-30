@@ -1,0 +1,92 @@
+[project]
+name = "QuiltiX"
+version = "0.2.0"
+description = "MaterialX Graphical Node Editor"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = "~=3.9"
+keywords = ["openusd", "materialx"]
+
+authors = [
+    {name = "Manuel Köster", email = "manuelkoestercg@gmail.com" },
+    {name = "Richard Frangenberg", email = "contact@prism-pipeline.com" },
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Topic :: Multimedia :: Graphics :: Editors",
+]
+
+dependencies = [
+    "Qt.py",
+    "PySide2>=5.12",
+    "PyOpenGL",
+    "PyOpenGL_accelerate",
+    # TODO
+    "NodeGraphQt @ git+https://github.com/manuelkoester/NodeGraphQt.git@develop",
+]
+
+# TODO
+[project.optional-dependencies]
+usd = [
+]
+
+# TODO
+materialx = [
+]
+
+dev = [
+    "black",
+    "ruff",
+    "Qt.py-stubs @ git+https://github.com/matiascodesal/Qt.py-stubs.git@5a07e53",
+    "pytest",
+    "pytest-qt",
+    "pytest-cov",
+    # TODO
+    # "MaterialX-stubs @ git+https://github.com/manuelkoester/MaterialX-stubs.git@7696cbb"
+]
+
+build = [
+    "pyinstaller",
+    "pygit"
+]
+
+pypi = [
+    "twine"
+]
+
+# Alias
+deps = ["QuiltiX[usd,materialx]"]
+all = ["QuiltiX[usd,materialx,dev,build,pypi]"]
+
+
+[project.urls]
+"Homepage" = "https://github.com/RichardFrangenberg/QuiltiX"
+"Bug Reports" = "https://github.com/RichardFrangenberg/QuiltiX/issues"
+"Source" = "https://github.com/RichardFrangenberg/QuiltiX"
+
+[build-system]
+requires = ["setuptools>=61.0.0", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+addopts = "--cov=QuiltiX"
+testpaths = [
+    "tests",
+]
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 120
+
+[tool.ruff]
+line-length = 120
+
+[project.gui-scripts]
+quiltix = "QuiltiX:quiltix"
