@@ -107,6 +107,9 @@ class StageViewWidget(QWidget):
         self.set_stage(stage)
 
     def get_current_renderer(self):
+        if not self.view._renderer:
+            return
+
         return self.view._renderer.GetCurrentRendererId()
 
     def get_current_renderer_name(self):
