@@ -547,8 +547,12 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                         connected_mx_def = self.get_mx_node_def(connected_node_data["type_"], connected_node_data.get("custom", {}).get("type"))
                         connected_port_type = connected_mx_def.getActiveOutputs()[0].getType()
                         if connected_port_type in ("material", "surfaceshader"):
+                            output_name = f"output_{node_data['name']}_{output_data['name']}"
+                            if main_mx_node_graph.getOutput(output_name):
+                                continue
+
                             main_mx_node_graph_output = main_mx_node_graph.addOutput(
-                                f"output_{output_data['name']}",
+                                output_name,
                                 mx_output_type,
                             )
                             main_mx_node_graph_output.setConnectedNode(
