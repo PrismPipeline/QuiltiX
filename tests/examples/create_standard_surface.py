@@ -13,8 +13,6 @@ def create_standard_surface():
             tex_node.change_type("color3")
             path = os.path.join(
                 constants.ROOT,
-                "src",
-                "QuiltiX",
                 "resources",
                 "materials",
                 "Wooden_Flooring_004_1k_8b",
