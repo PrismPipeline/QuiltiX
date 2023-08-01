@@ -427,6 +427,19 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         if not mx_parent:
             mx_parent = mx.createDocument()
 
+        ng_abstraction = self.widget.parent().act_ng_abstraction.isChecked()
+        if parent_graph_data:
+            ng_abstraction = False
+
+        if ng_abstraction:
+            for node_id in serialized_data.get("nodes", []):
+                node_data = serialized_data["nodes"][node_id]
+                if node_data["type_"] == "Other.QxGroupNode":
+                    ng_abstraction = False
+
+        if ng_abstraction:
+            main_mx_node_graph = mx_parent.addNodeGraph("NG_main")
+
         qx_node_ids_to_mx_nodes = {} if qx_node_ids_to_mx_nodes is None else qx_node_ids_to_mx_nodes
         for node_id in serialized_data.get("nodes", []):
             node_data = serialized_data["nodes"][node_id]
@@ -468,11 +481,18 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             elif mx_def.getNodeGroup() == "material":
                 mx_node = mx_parent.addMaterialNode(node_data["name"])
             elif mx_def.getActiveOutputs():
-                mx_node = mx_parent.addNode(
-                    mx_def.getNodeString(),
-                    node_data["name"],
-                    mx_def.getActiveOutputs()[0].getType(),
-                )
+                if ng_abstraction and mx_def.getActiveOutputs()[0].getType() != "surfaceshader":
+                    mx_node = main_mx_node_graph.addNode(
+                        mx_def.getNodeString(),
+                        node_data["name"],
+                        mx_def.getActiveOutputs()[0].getType(),
+                    )
+                else:
+                    mx_node = mx_parent.addNode(
+                        mx_def.getNodeString(),
+                        node_data["name"],
+                        mx_def.getActiveOutputs()[0].getType(),
+                    )
             else:
                 logger.warning("node has no outputs: %s" % mx_def.getNodeString())
                 continue
@@ -509,6 +529,42 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
             qx_node_ids_to_mx_nodes[node_id] = mx_node
 
+        if ng_abstraction:
+            main_mx_node_graph_outputs = {}
+            for node_id in serialized_data.get("nodes", []):
+                node_data = serialized_data["nodes"][node_id]
+                mx_def = self.get_mx_node_def(node_data["type_"], node_data.get("custom", {}).get("type"))
+                for output_data in node_data.get("output_ports", {}):
+                    mx_output_type = mx_def.getActiveOutput(output_data["name"]).getType()
+                    if mx_output_type in ("material", "surfaceshader"):
+                        continue
+
+                    for connection in serialized_data.get("connections", []):
+                        if connection["out"][0] != node_id:
+                            continue
+
+                        connected_node_data = serialized_data["nodes"][connection["in"][0]]
+                        connected_mx_def = self.get_mx_node_def(connected_node_data["type_"], connected_node_data.get("custom", {}).get("type"))
+                        connected_port_type = connected_mx_def.getActiveOutputs()[0].getType()
+                        if connected_port_type in ("material", "surfaceshader"):
+                            output_name = f"output_{node_data['name']}_{output_data['name']}"
+                            if main_mx_node_graph.getOutput(output_name):
+                                continue
+
+                            main_mx_node_graph_output = main_mx_node_graph.addOutput(
+                                output_name,
+                                mx_output_type,
+                            )
+                            main_mx_node_graph_output.setConnectedNode(
+                                qx_node_ids_to_mx_nodes[node_id]
+                            )
+                            if node_id not in main_mx_node_graph_outputs:
+                                main_mx_node_graph_outputs[node_id] = {}
+
+                            main_mx_node_graph_outputs[node_id][
+                                output_data["name"]
+                            ] = main_mx_node_graph_output
+
         for connection in serialized_data.get("connections", []):
             if serialized_data["nodes"][connection["in"][0]]["type_"] in ["Outputs.QxPortOutputNode"]:
                 continue
@@ -526,6 +582,11 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                 mx_input.setNodeGraphString(connected_mx_node.getName())
                 mx_input.setConnectedOutput(
                     connected_mx_node.getActiveOutput(connection["out"][1])
+                )
+            elif ng_abstraction and connection["out"][0] in main_mx_node_graph_outputs:
+                mx_input.setNodeGraphString(main_mx_node_graph.getName())
+                mx_input.setConnectedOutput(
+                    main_mx_node_graph_outputs[connection["out"][0]][connection["out"][1]]
                 )
             else:
                 mx_input.setConnectedNode(
@@ -670,7 +731,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
         self.mx_file_loaded.emit(mx_file_path)
 
-    def load_image_file(self, filepath):
+    def load_image_file(self, filepath, xoffset=0, yoffset=0):
         local_pos = self.viewer().mapFromGlobal(QtGui.QCursor.pos())
         pos = self.viewer().mapToScene(local_pos)
         name = os.path.splitext(os.path.basename(filepath))[0]
@@ -678,7 +739,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             "Texture2d.Image",
             name=name,
             selected=True,
-            pos=[pos.x(), pos.y()],
+            pos=[pos.x() + xoffset, pos.y() + yoffset],
         )
         qx_node.set_property("type", "color3")
         qx_node.set_property("file", filepath)
@@ -759,8 +820,8 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         qx_node_type = self.get_qx_node_type_from_mx_node(mx_node)
         if not pos and mx_node.hasAttribute("xpos") and mx_node.hasAttribute("ypos"):
             pos = [
-                float(mx_node.getAttribute("xpos")) / constants.NODEGRAPH_NODE_POSITION_SERIALIZATION_SCALE*100,
-                float(mx_node.getAttribute("ypos")) / constants.NODEGRAPH_NODE_POSITION_SERIALIZATION_SCALE*100
+                float(mx_node.getAttribute("xpos")) / constants.NODEGRAPH_NODE_POSITION_SERIALIZATION_SCALE,
+                float(mx_node.getAttribute("ypos")) / constants.NODEGRAPH_NODE_POSITION_SERIALIZATION_SCALE
                 ]
 
         name = name or mx_node.getName()
