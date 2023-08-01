@@ -8,8 +8,6 @@ def load_amd_copper_mtlx():
     with helpers.quiltix_instance() as editor:
         mx_file = os.path.join(
             constants.ROOT,
-            "src",
-            "QuiltiX",
             "resources",
             "materials",
             "Mahogany_Chevron_Flooring_1k_8b",
