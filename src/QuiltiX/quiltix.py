@@ -85,8 +85,7 @@ class QuiltiXWindow(QMainWindow):
             ROOT,
             "resources",
             "materials",
-            "Tiles_Black_Long_Variative_1k_8b",
-            "Tiles_Black_Long_Variative.mtlx",
+            "standard_surface.mtlx"
         )
         if not os.path.exists(mx_file):
             return
@@ -95,7 +94,6 @@ class QuiltiXWindow(QMainWindow):
 
     def load_shaderball(self):
         stage_file = os.path.join(ROOT, "resources", "geometry", "matx_shaderball_uv.usdc")
-        # stage_file = os.path.join(ROOT, "resources", "geometry", "StandardShaderBall", "layers", "shaderball.usda")
         stage = usd_stage.get_stage_from_file(stage_file)
         self.stage_ctrl.set_stage(stage)
 

@@ -641,11 +641,6 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         self.widget.parent().validate(mx_graph_doc, popup=False)
         xml_data = mx.writeToXmlString(mx_graph_doc)
 
-        # path = r"D:\tmp\2610\04_Resources\Libraries\GPU_Open\Bark_Pine_1k_8b\Bark_Pine.mtlx"
-        # with open(path, "r") as f:
-        #     xml_data = f.read()
-        #     xml_data = xml_data.replace("\"textures/", "\"D:/tmp/2610/04_Resources/Libraries/GPU_Open/Bark_Pine_1k_8b/textures/")
-
         return xml_data
 
     def update_mx_xml_data_from_graph(self):
