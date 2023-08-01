@@ -820,8 +820,8 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         qx_node_type = self.get_qx_node_type_from_mx_node(mx_node)
         if not pos and mx_node.hasAttribute("xpos") and mx_node.hasAttribute("ypos"):
             pos = [
-                float(mx_node.getAttribute("xpos")) / constants.NODEGRAPH_NODE_POSITION_SERIALIZATION_SCALE*100,
-                float(mx_node.getAttribute("ypos")) / constants.NODEGRAPH_NODE_POSITION_SERIALIZATION_SCALE*100
+                float(mx_node.getAttribute("xpos")) / constants.NODEGRAPH_NODE_POSITION_SERIALIZATION_SCALE,
+                float(mx_node.getAttribute("ypos")) / constants.NODEGRAPH_NODE_POSITION_SERIALIZATION_SCALE
                 ]
 
         name = name or mx_node.getName()
