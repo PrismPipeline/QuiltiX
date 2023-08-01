@@ -30,6 +30,9 @@ dependencies = [
     "NodeGraphQt @ git+https://github.com/manuelkoester/NodeGraphQt.git@develop",
 ]
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 # TODO
 [project.optional-dependencies]
 usd = [
