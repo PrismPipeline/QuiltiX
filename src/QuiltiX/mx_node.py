@@ -53,8 +53,9 @@ def get_mx_stdlib_paths():
         return paths
 
     # Deal with quiltix being called from hython
+    # will result in '{houdini_install_dir}/houdini/materialx/libraries'
     if Path(sys.executable).stem == "hython":
-        return [Path(Path(sys.executable).parent.parent, "houdini", "materialx").as_posix()]
+        return [Path(Path(sys.executable).parent.parent, "houdini", "materialx", "libraries").as_posix()]
 
     import pxr  # type: ignore
     usd_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(pxr.__file__))))
