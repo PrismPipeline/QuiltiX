@@ -135,7 +135,7 @@ Overview over the most important Environment Variables:
 
 
 **_What is a Hdyra Delegate?_**  
-"Hydra Render Delegates are bridges between the Hydra viewport and a renderer. They were created by Pixar as part of the Hydra renderer used in usdview. The Hydra Render Delegate system allows the ability to switch out the backend renderer for the viewport data in Hydra. [...]"<sup>[[src]](https://learn.foundry.com/katana/dev-guide/Plugins/HydraRenderDelegates/Introduction.html#what-is-a-hydra-render-delegate)</sup>
+"Hydra Render Delegates are bridges between the Hydra viewport and a renderer. [...] The Hydra Render Delegate system allows the ability to switch out the backend renderer for the viewport data in Hydra. [...]"<sup>[[src]](https://learn.foundry.com/katana/dev-guide/Plugins/HydraRenderDelegates/Introduction.html#what-is-a-hydra-render-delegate)</sup>
 
 The [Storm Hydra Delegate](https://openusd.org/dev/api/hd_storm_page_front.html) by Pixar is both shipped with USD and enabled per default in QuiltiX. 
 
