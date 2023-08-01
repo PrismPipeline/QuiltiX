@@ -27,6 +27,7 @@ dependencies = [
     "PyOpenGL",
     "PyOpenGL_accelerate",
     # TODO
+    "NodeGraphQt-QuiltiX-fork",
     # "NodeGraphQt @ git+https://github.com/manuelkoester/NodeGraphQt.git@develop",
 ]
 
