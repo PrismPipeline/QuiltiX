@@ -58,6 +58,10 @@ def get_mx_stdlib_paths():
         return [Path(Path(sys.executable).parent.parent, "houdini", "materialx", "libraries").as_posix()]
 
     import pxr  # type: ignore
+    usd_root = os.path.dirname(pxr.__file__)  # flat pxr module
+    if pxr_stdlib := recurse_find_mx_stdlib_in_dir(usd_root):
+        return [pxr_stdlib]
+
     usd_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(pxr.__file__))))
     if pxr_stdlib := recurse_find_mx_stdlib_in_dir(usd_root):
         return [pxr_stdlib]
