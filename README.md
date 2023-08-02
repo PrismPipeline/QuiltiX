@@ -8,7 +8,7 @@
 <div align="center">
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/PrismPipeline/QuiltiX/LICENSE)
-[![Version](https://img.shields.io/github/v/release/PrismPipeline/QuiltiX/releases)](https://github.com/PrismPipeline/QuiltiX/releases/latest)
+[![Version](https://img.shields.io/github/v/release/PrismPipeline/QuiltiX)](https://github.com/PrismPipeline/QuiltiX/releases/latest)
 </div>
 
 QuiltiX is a graphical node editor to edit, and author [MaterialX](https://materialx.org/) based materials of 3D assets. It includes a viewport based on [OpenUSD](https://www.openusd.org/release/index.html)'s [Hydra](https://openusd.org/release/glossary.html#hydra), which enables viewing your assets in any renderer supporting both Hydra & MaterialX.
