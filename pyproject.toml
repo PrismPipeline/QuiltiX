@@ -9,7 +9,7 @@ keywords = ["openusd", "materialx"]
 
 authors = [
     {name = "Manuel Köster", email = "manuelkoestercg@gmail.com" },
-    {name = "Richard Frangenberg", email = "contact@prism-pipeline.com" },
+    {name = "Richard Frangenberg", email = "richard@prism-pipeline.com" },
 ]
 
 classifiers = [
