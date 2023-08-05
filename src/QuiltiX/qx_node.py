@@ -299,6 +299,7 @@ class QxNode(QxNodeBase):
 
         # Store connections & values for them to be restored later
         original_values = self.properties()["custom"]
+        original_mx_def = self.current_mx_def
         original_input_connections = {inp: input_port.connected_ports() for inp, input_port in self.inputs().items()}
         original_output_connections = {outp: output_port.connected_ports() for outp, output_port in self.outputs().items()}
 
@@ -321,16 +322,26 @@ class QxNode(QxNodeBase):
 
         self.refresh_port_tooltips()
 
-        self._restore_values(original_values)
+        self._restore_values(original_values, original_mx_def)
 
         # TODO: create convert node between connections if port types don't match and if conversion possible
         self._restore_input_connections(original_input_connections)
         self._restore_output_connections(original_output_connections)
 
-    def _restore_values(self, original_values):
+    def _restore_values(self, original_values, original_mx_def):
+        original_types = { i.getName(): i.getType() for i in original_mx_def.getInputs() }
+        new_types = { i.getName(): i.getType() for i in self.current_mx_def.getInputs() }
+
         for property_name, value in original_values.items():
-            if property_name != "type" and property_name in self.properties()["custom"] and type(value) == type(self.properties()["custom"][property_name]):
-                self.set_property(property_name, value)
+            # Skip if the property name describes the node type or doesn't exist on the node's custom properties anymore
+            if property_name == "type" or property_name not in self.properties()["custom"]:
+                continue
+
+            # Skip if the name has not changed, but the type has
+            if property_name in original_types and property_name in new_types and original_types[property_name] != new_types[property_name]:
+                continue
+
+            self.set_property(property_name, value)
 
     def _restore_input_connections(self, original_input_connections):
         for input_name, input_port in self.inputs().items():
