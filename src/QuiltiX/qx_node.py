@@ -333,12 +333,20 @@ class QxNode(QxNodeBase):
         new_types = { i.getName(): i.getType() for i in self.current_mx_def.getInputs() }
 
         for property_name, value in original_values.items():
-            # Skip if the property name describes the node type or doesn't exist on the node's custom properties anymore
-            if property_name == "type" or property_name not in self.properties()["custom"]:
+            # Skip if the property name describes the node type
+            if property_name == "type":
                 continue
 
-            # Skip if the name has not changed, but the type has
-            if property_name in original_types and property_name in new_types and original_types[property_name] != new_types[property_name]:
+            # Skip if the property doesn't exist on the node's custom properties anymore
+            if property_name not in self.properties()["custom"]:
+                continue
+
+            # Skip if the property name has not changed, but the property type has
+            if (
+                property_name in original_types
+                and property_name in new_types
+                and original_types[property_name] != new_types[property_name]
+            ):
                 continue
 
             self.set_property(property_name, value)
