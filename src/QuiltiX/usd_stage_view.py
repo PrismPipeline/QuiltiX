@@ -18,14 +18,15 @@ logger = logging.getLogger(__name__)
 class StageViewWidget(QWidget):
     keyPressed = Signal(object, object)
     fileDropped = Signal(object)
+    rendererChanged = Signal(object)
 
-    def __init__(self, stage=None, window_title="USD Stageview"):
+    def __init__(self, data_model, stage_view, stage=None, window_title="USD Stageview"):
         super(StageViewWidget, self).__init__()
 
-        self.model = StageView.DefaultDataModel()
+        self.model = data_model
         self.model.viewSettings.showHUD = False
 
-        self.view = StageView(dataModel=self.model)
+        self.view = stage_view
         self.view.orig_handleRendererChanged = self.view._handleRendererChanged
         self.view._handleRendererChanged = self._handleRendererChanged
 
@@ -133,6 +134,7 @@ class StageViewWidget(QWidget):
     def _handleRendererChanged(self, rendererId):
         self.view.orig_handleRendererChanged(rendererId)
         self.apply_rendersettings_to_current_delegate()
+        self.rendererChanged.emit(rendererId)
 
     def apply_rendersettings_to_current_delegate(self):
         renderer_id = self.get_current_renderer()
