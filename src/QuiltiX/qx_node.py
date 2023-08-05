@@ -293,9 +293,43 @@ class QxNode(QxNodeBase):
             property_name, mx_input_value, widget_type=widget_type, range=value_range
         )
 
+    def get_mx_def_name_from_data_type(self, data_type, from_port="in"):
+        if from_port not in ["in", "out"]:
+            raise ValueError(f"Invalid port type: {from_port}")
+
+        if data_type in self.possible_mx_defs:
+            return data_type
+        
+        # Check additionally for matching types in the first output
+        if from_port == "in":
+            mx_def_type_name_to_port_data_type_map = { mx_def_name:mx_def.getOutputs()[0].getType() for mx_def_name, mx_def in self.possible_mx_defs.items() if mx_def.getOutputs() }
+        elif from_port == "out":
+            mx_def_type_name_to_port_data_type_map = { mx_def_name:mx_def.getInputs()[0].getType() for mx_def_name, mx_def in self.possible_mx_defs.items() if mx_def.getInputs() }
+            
+
+        if data_type not in mx_def_type_name_to_port_data_type_map.values():
+            logger.warn(f"Could not find definition of type {data_type} for node {self.name()}")
+            return
+        else:
+            # There can be multiple mx defs that match. Make a "good" guess with the first one we find :)
+            possible_type_names = [ mx_def_name for mx_def_name, mx_def_type_name in mx_def_type_name_to_port_data_type_map.items() if mx_def_type_name == data_type]
+            data_type = possible_type_names[0]
+            return data_type
+
+        
+
     def change_type(self, type_name):
         if type_name not in self.possible_mx_defs:
-            return
+            # Check additionally for matching types in the first output
+            mx_def_name_to_mx_def_type_map = { mx_def_name:mx_def.getOutputs()[0].getType() for mx_def_name, mx_def in self.possible_mx_defs.items() if mx_def.getOutputs() }
+
+            if type_name not in mx_def_name_to_mx_def_type_map.values():
+                logger.warn(f"Could not find definition of type {type_name} for node {self.name()}")
+                return
+            else:
+                # There can be multiple mx defs that match. Make a "good" guess with the first one we find :)
+                possible_type_names = [ mx_def_name for mx_def_name, mx_def_type_name in mx_def_name_to_mx_def_type_map.items() if mx_def_type_name == type_name]
+                type_name = possible_type_names[0]
 
         # Store connections & values for them to be restored later
         original_values = self.properties()["custom"]

@@ -278,6 +278,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         qx_node._view.basenode = qx_node
         if isinstance(qx_node, NodeGraphQt.BackdropNode):
             return
+
         for nodeInput in qx_node.input_ports():
             if hasattr(nodeInput._Port__view, "refresh_tool_tip"):
                 nodeInput._Port__view.refresh_tool_tip()
@@ -291,13 +292,20 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             node_to_connect = self.get_node_by_id(port_to_connect.node.id)
             if port_to_connect.port_type == "in":
                 source_port = node_to_connect.inputs()[port_to_connect.name]
+                target_port = next(iter(qx_node.outputs().values()))
             else:
                 source_port = node_to_connect.outputs()[port_to_connect.name]
+                target_port = next(iter(qx_node.inputs().values()))
 
             if hasattr(source_port.view, "get_mx_port_type"):
-                port_type = source_port.view.get_mx_port_type()
-                if port_type and qx_node.current_mx_def.getType() != port_type:
-                    qx_node.change_type(port_type)
+                source_port_type = source_port.view.get_mx_port_type()
+                target_port_type = target_port.view.get_mx_port_type()
+                # if port_type and qx_node.current_mx_def.getType() != port_type:
+                # if port_type and qx_node.current_mx_def.getInputs()[0].getType() != port_type:
+                if source_port_type != target_port_type:
+                    mx_def_name = qx_node.get_mx_def_name_from_data_type(target_port_type, port_to_connect.port_type)
+
+                    qx_node.change_type(mx_def_name)
 
             if port_to_connect.port_type == "in":
                 node_port = qx_node.output_ports()[0]
