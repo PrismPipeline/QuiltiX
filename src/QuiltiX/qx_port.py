@@ -73,8 +73,7 @@ class QxPortItem(NodeGraphQt.qgraphics.node_base.PortItem):
         return port_types
 
     def refresh_tool_tip(self):
-        port_types = self.get_port_types()
-        ttip = ", ".join(port_types)
+        ttip = self.get_port_types(current=True)
         self.setToolTip(ttip)
 
     def paint(self, painter, option, widget):
