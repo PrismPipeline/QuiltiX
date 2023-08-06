@@ -278,6 +278,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         qx_node._view.basenode = qx_node
         if isinstance(qx_node, NodeGraphQt.BackdropNode):
             return
+
         for nodeInput in qx_node.input_ports():
             if hasattr(nodeInput._Port__view, "refresh_tool_tip"):
                 nodeInput._Port__view.refresh_tool_tip()
@@ -286,29 +287,46 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             if hasattr(nodeOutput._Port__view, "refresh_tool_tip"):
                 nodeOutput._Port__view.refresh_tool_tip()
 
+        # If the the node is created from the live connection tab menu we want to try to match the port types
         port_to_connect = getattr(self.viewer()._search_widget, "port_to_connect", None)
-        if port_to_connect:
-            node_to_connect = self.get_node_by_id(port_to_connect.node.id)
-            if port_to_connect.port_type == "in":
-                source_port = node_to_connect.inputs()[port_to_connect.name]
-            else:
-                source_port = node_to_connect.outputs()[port_to_connect.name]
+        if not port_to_connect:
+            return
 
-            if hasattr(source_port.view, "get_mx_port_type"):
-                port_type = source_port.view.get_mx_port_type()
-                if port_type and qx_node.current_mx_def.getType() != port_type:
-                    qx_node.change_type(port_type)
+        # Skip if the created node is a group node which does not have types -> no type change needed
+        if qx_node.type_ == "Other.QxGroupNode":
+            return
 
-            if port_to_connect.port_type == "in":
-                node_port = qx_node.output_ports()[0]
-            else:
-                node_port = qx_node.input_ports()[0]
+        # Skip if the created node does not have opposing ports -> no type change needed
+        ports = qx_node.outputs() if port_to_connect.port_type == "in" else qx_node.inputs()
+        if not ports:
+            return
 
-            node_port.connect_to(source_port)
-            delta = qx_node._view.scenePos() - node_port._Port__view.scenePos()
-            new_pos = qx_node._view.scenePos() + delta
-            qx_node.set_pos(new_pos.x(), new_pos.y())
-            QtWidgets.QApplication.processEvents()
+        node_to_connect = self.get_node_by_id(port_to_connect.node.id)
+        target_port = next(iter(ports.values()))
+
+        if port_to_connect.port_type == "in":
+            source_port = node_to_connect.inputs()[port_to_connect.name]
+        else:
+            source_port = node_to_connect.outputs()[port_to_connect.name]
+
+        if hasattr(source_port.view, "get_mx_port_type"):
+            source_port_type = source_port.view.get_mx_port_type()
+            target_port_type = target_port.view.get_mx_port_type()
+            if source_port_type != target_port_type:
+                mx_def_name = qx_node.get_mx_def_name_from_data_type(source_port_type, target_port.type_())
+
+                qx_node.change_type(mx_def_name)
+
+        if port_to_connect.port_type == "in":
+            node_port = qx_node.output_ports()[0]
+        else:
+            node_port = qx_node.input_ports()[0]
+
+        node_port.connect_to(source_port)
+        delta = qx_node._view.scenePos() - node_port._Port__view.scenePos()
+        new_pos = qx_node._view.scenePos() + delta
+        qx_node.set_pos(new_pos.x(), new_pos.y())
+        QtWidgets.QApplication.processEvents()
 
     def on_nodes_deleted(self, node_ids):
         self.has_deleted_nodes = True
