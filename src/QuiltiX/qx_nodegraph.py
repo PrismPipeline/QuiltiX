@@ -289,14 +289,17 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
         # If the the node is created from the live connection tab menu we want to try to match the port types
         port_to_connect = getattr(self.viewer()._search_widget, "port_to_connect", None)
-        if port_to_connect and qx_node.type_ != "Other.QxGroupNode":
+        ports = qx_node.inputs() if port_to_connect.port_type == "in" else qx_node.outputs()
+
+        # Skip if the created node does not have opposing ports
+        if port_to_connect and qx_node.type_ != "Other.QxGroupNode" and ports:
             node_to_connect = self.get_node_by_id(port_to_connect.node.id)
+            target_port = next(iter(ports))
+
             if port_to_connect.port_type == "in":
                 source_port = node_to_connect.inputs()[port_to_connect.name]
-                target_port = next(iter(qx_node.outputs().values()))
             else:
                 source_port = node_to_connect.outputs()[port_to_connect.name]
-                target_port = next(iter(qx_node.inputs().values()))
 
             if hasattr(source_port.view, "get_mx_port_type"):
                 source_port_type = source_port.view.get_mx_port_type()
@@ -312,10 +315,10 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                 node_port = qx_node.input_ports()[0]
 
             node_port.connect_to(source_port)
-            delta = qx_node._view.scenePos() - node_port._Port__view.scenePos()
-            new_pos = qx_node._view.scenePos() + delta
-            qx_node.set_pos(new_pos.x(), new_pos.y())
-            QtWidgets.QApplication.processEvents()
+        delta = qx_node._view.scenePos() - node_port._Port__view.scenePos()
+        new_pos = qx_node._view.scenePos() + delta
+        qx_node.set_pos(new_pos.x(), new_pos.y())
+        QtWidgets.QApplication.processEvents()
 
     def on_nodes_deleted(self, node_ids):
         self.has_deleted_nodes = True
