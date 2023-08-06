@@ -287,8 +287,9 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             if hasattr(nodeOutput._Port__view, "refresh_tool_tip"):
                 nodeOutput._Port__view.refresh_tool_tip()
 
+        # If the the node is created from the live connection tab menu we want to try to match the port types
         port_to_connect = getattr(self.viewer()._search_widget, "port_to_connect", None)
-        if port_to_connect:
+        if port_to_connect and qx_node.type_ != "Other.QxGroupNode":
             node_to_connect = self.get_node_by_id(port_to_connect.node.id)
             if port_to_connect.port_type == "in":
                 source_port = node_to_connect.inputs()[port_to_connect.name]
@@ -300,10 +301,8 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             if hasattr(source_port.view, "get_mx_port_type"):
                 source_port_type = source_port.view.get_mx_port_type()
                 target_port_type = target_port.view.get_mx_port_type()
-                # if port_type and qx_node.current_mx_def.getType() != port_type:
-                # if port_type and qx_node.current_mx_def.getInputs()[0].getType() != port_type:
                 if source_port_type != target_port_type:
-                    mx_def_name = qx_node.get_mx_def_name_from_data_type(target_port_type, port_to_connect.port_type)
+                    mx_def_name = qx_node.get_mx_def_name_from_data_type(source_port_type, target_port.type_())
 
                     qx_node.change_type(mx_def_name)
 
