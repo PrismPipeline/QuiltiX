@@ -126,7 +126,9 @@ class QxNode(QxNodeBase):
             return mx_node_category
         else:
             # TODO: log error, definition can't be found
-            logger.warning(f"Could not find matching definition for type '{mx_node.getType()}' of node '{mx_node.getName()}'.")
+            logger.warning(
+                f"Could not find matching definition for type '{mx_node.getType()}' of node '{mx_node.getName()}'."
+            )
             return None
 
     def update_from_mx_node(self, mx_node):
@@ -299,24 +301,33 @@ class QxNode(QxNodeBase):
 
         if data_type in self.possible_mx_defs:
             return data_type
-        
+
         # Check additionally for matching types in the first output
         if from_port == "in":
-            mx_def_type_name_to_port_data_type_map = { mx_def_name:mx_def.getInputs()[0].getType() for mx_def_name, mx_def in self.possible_mx_defs.items() if mx_def.getInputs() }
+            mx_def_type_name_to_port_data_type_map = {
+                mx_def_name: mx_def.getInputs()[0].getType()
+                for mx_def_name, mx_def in self.possible_mx_defs.items()
+                if mx_def.getInputs()
+            }
         elif from_port == "out":
-            mx_def_type_name_to_port_data_type_map = { mx_def_name:mx_def.getOutputs()[0].getType() for mx_def_name, mx_def in self.possible_mx_defs.items() if mx_def.getOutputs() }
-            
+            mx_def_type_name_to_port_data_type_map = {
+                mx_def_name: mx_def.getOutputs()[0].getType()
+                for mx_def_name, mx_def in self.possible_mx_defs.items()
+                if mx_def.getOutputs()
+            }
 
         if data_type not in mx_def_type_name_to_port_data_type_map.values():
             logger.warn(f"Could not find definition of type {data_type} for node {self.name()}")
             return
         else:
             # There can be multiple mx defs that match. Make a "good" guess with the first one we find :)
-            possible_type_names = [ mx_def_name for mx_def_name, mx_def_type_name in mx_def_type_name_to_port_data_type_map.items() if mx_def_type_name == data_type]
+            possible_type_names = [
+                mx_def_name
+                for mx_def_name, mx_def_type_name in mx_def_type_name_to_port_data_type_map.items()
+                if mx_def_type_name == data_type
+            ]
             data_type = possible_type_names[0]
             return data_type
-
-        
 
     def change_type(self, type_name):
         if type_name not in self.possible_mx_defs:
@@ -326,7 +337,9 @@ class QxNode(QxNodeBase):
         # Store connections & values for them to be restored later
         original_values = self.properties()["custom"]
         original_input_connections = {inp: input_port.connected_ports() for inp, input_port in self.inputs().items()}
-        original_output_connections = {outp: output_port.connected_ports() for outp, output_port in self.outputs().items()}
+        original_output_connections = {
+            outp: output_port.connected_ports() for outp, output_port in self.outputs().items()
+        }
 
         for p in self.input_ports():
             p.clear_connections()
@@ -363,7 +376,8 @@ class QxNode(QxNodeBase):
             if input_name in original_input_connections:
                 input_port_type = input_port.view.get_mx_port_type()
 
-                original_connected_port = next(iter(original_input_connections[input_name]), None)  # inputs can only have one connection
+                # inputs can only have one connection
+                original_connected_port = next(iter(original_input_connections[input_name]), None)  
                 if original_connected_port:
                     original_connected_port_type = original_connected_port.view.get_mx_port_type()
 
