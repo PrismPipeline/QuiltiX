@@ -1,6 +1,6 @@
 [project]
 name = "QuiltiX"
-version = "0.2.0"
+version = "0.4.0"
 description = "MaterialX Graphical Node Editor"
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -9,7 +9,7 @@ keywords = ["openusd", "materialx"]
 
 authors = [
     {name = "Manuel Köster", email = "manuelkoestercg@gmail.com" },
-    {name = "Richard Frangenberg", email = "contact@prism-pipeline.com" },
+    {name = "Richard Frangenberg", email = "richard@prism-pipeline.com" },
 ]
 
 classifiers = [
@@ -27,50 +27,41 @@ dependencies = [
     "PyOpenGL",
     "PyOpenGL_accelerate",
     # TODO
-    "NodeGraphQt @ git+https://github.com/manuelkoester/NodeGraphQt.git@develop",
+    "NodeGraphQt-QuiltiX-fork",
+    # "NodeGraphQt @ git+https://github.com/manuelkoester/NodeGraphQt.git@develop",
 ]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
-# TODO
 [project.optional-dependencies]
-usd = [
-]
-
-# TODO
-materialx = [
-]
-
 dev = [
     "black",
     "ruff",
-    "Qt.py-stubs @ git+https://github.com/matiascodesal/Qt.py-stubs.git@5a07e53",
     "pytest",
     "pytest-qt",
     "pytest-cov",
     # TODO
+    # "Qt.py-stubs @ git+https://github.com/matiascodesal/Qt.py-stubs.git@5a07e53",
     # "MaterialX-stubs @ git+https://github.com/manuelkoester/MaterialX-stubs.git@7696cbb"
 ]
 
-build = [
-    "pyinstaller",
-    "pygit"
-]
+# TODO
+# usd = [
+# ]
 
-pypi = [
-    "twine"
-]
-
-# Alias
-deps = ["QuiltiX[usd,materialx]"]
-all = ["QuiltiX[usd,materialx,dev,build,pypi]"]
+# TODO
+# materialx = [
+# ]
 
 
 [project.urls]
 "Homepage" = "https://github.com/PrismPipeline/QuiltiX"
 "Bug Reports" = "https://github.com/PrismPipeline/QuiltiX/issues"
 "Source" = "https://github.com/PrismPipeline/QuiltiX"
+
+[project.gui-scripts]
+quiltix = "QuiltiX:quiltix"
 
 [build-system]
 requires = ["setuptools>=61.0.0", "setuptools-scm"]
@@ -90,6 +81,3 @@ line-length = 120
 
 [tool.ruff]
 line-length = 120
-
-[project.gui-scripts]
-quiltix = "QuiltiX:quiltix"

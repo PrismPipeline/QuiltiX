@@ -25,8 +25,8 @@ QWidget {
 QDockWidget {
     background-color: #222222;
     color: #ffffff;
-    titlebar-close-icon: url("src/QuiltiX/resources/icons/close-icon.png");
-    titlebar-normal-icon: url("src/QuiltiX/resources/icons/window-restore-icon.png");
+    titlebar-close-icon: url("resources/icons/close-icon.png");
+    titlebar-normal-icon: url("resources/icons/window-restore-icon.png");
 }
 
 QDockWidget::title {
@@ -174,7 +174,7 @@ QComboBox::drop-down {
 }
 
 QComboBox::down-arrow {
-    image: url("src/QuiltiX/resources/icons/drop-down-arrow-icon.png");
+    image: url("resources/icons/drop-down-arrow-icon.png");
     width: 24px;
     height: 24px;
 	padding-top: 4px;
@@ -282,11 +282,11 @@ QTreeView::item:disabled  {
 
 QTreeView::branch:open:has-children:!has-siblings,
 QTreeView::branch:open:has-children:has-siblings  {
-    image: url("src/QuiltiX/resources/icons/drop-down-arrow-icon.png");
+    image: url("resources/icons/drop-down-arrow-icon.png");
 }
 QTreeView::branch:has-children:!has-siblings:closed,
 QTreeView::branch:closed:has-children:has-siblings {
-    image: url("src/QuiltiX/resources/icons/drop-down-arrow-closed-icon.png");
+    image: url("resources/icons/drop-down-arrow-closed-icon.png");
 }
 
 QHeaderView,
@@ -297,11 +297,11 @@ QHeaderView::section {
 }
 
 QHeaderView::up-arrow {
-    image: url("src/QuiltiX/resources/icons/drop-down-arrow-closed-icon.png");
+    image: url("resources/icons/drop-down-arrow-closed-icon.png");
 }
 
 QHeaderView::down-arrow {
-    image: url("src/QuiltiX/resources/icons/drop-down-arrow-icon.png");
+    image: url("resources/icons/drop-down-arrow-icon.png");
 }
 
 /* slider */
@@ -413,7 +413,7 @@ QCheckBox::indicator {
 
 QCheckBox::indicator:checked {
     background-color: #111111;
-	image: url("src/QuiltiX/resources/icons/check-icon.png");
+	image: url("resources/icons/check-icon.png");
 }
 
 QCheckBox::indicator:unchecked {

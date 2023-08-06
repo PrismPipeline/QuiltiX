@@ -1,5 +1,6 @@
 <p align="center">
-  <img src="media/quiltix-logo-full.svg" height="170" />
+  <img src="media/quiltix-logo-full.svg#gh-dark-mode-only" height="170" />
+  <img src="media/quiltix-logo-full-light-mode.svg#gh-light-mode-only" height="200" />
 </p>
 
 ----  
@@ -7,7 +8,7 @@
 <div align="center">
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/PrismPipeline/QuiltiX/LICENSE)
-[![Version](https://img.shields.io/github/v/release/PrismPipeline/QuiltiX/releases)](https://github.com/PrismPipeline/QuiltiX/releases/latest)
+[![Version](https://img.shields.io/github/v/release/PrismPipeline/QuiltiX)](https://github.com/PrismPipeline/QuiltiX/releases/latest)
 </div>
 
 QuiltiX is a graphical node editor to edit, and author [MaterialX](https://materialx.org/) based materials of 3D assets. It includes a viewport based on [OpenUSD](https://www.openusd.org/release/index.html)'s [Hydra](https://openusd.org/release/glossary.html#hydra), which enables viewing your assets in any renderer supporting both Hydra & MaterialX.
@@ -19,6 +20,7 @@ QuiltiX is a graphical node editor to edit, and author [MaterialX](https://mater
 - [Requirements](#requirements)
 - [Installation](#installation)
   - [From PyPi](#from-pypi)
+  - [From Zip](#from-zip)
   - [From Source](#from-source)
 - [Running QuiltiX](#running-quiltix)
   - [Running QuiltiX using hython](#running-quiltix-using-hython)
@@ -27,6 +29,7 @@ QuiltiX is a graphical node editor to edit, and author [MaterialX](https://mater
     - [Arnold](#arnold)
     - [Karma](#karma)
   - [Adding custom MaterialX Node definitions](#adding-custom-materialx-node-definitions)
+- [Platform support](#platform-support)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -40,10 +43,18 @@ QuiltiX requires Python 3.9+ as well as compiled versions of USD and MaterialX.
 pip install QuiltiX
 ```
 
-If you additionally require pre-built binaries for MaterialX & USD:
+If you additionally require pre-built binaries for MaterialX & USD we currently provide these for Windows.
+On Linux you need to provide your own binaries for now. Here are linked instructions for [MaterialX](https://github.com/AcademySoftwareFoundation/MaterialX/tree/main#quick-start-for-developers) & [OpenUSD](https://github.com/PixarAnimationStudios/OpenUSD/blob/release/BUILDING.md)
 ```shell
-pip install QuiltiX[cppdeps]
+pip install QuiltiX
+pip install git+https://github.com/PrismPipeline/OpenUSD_build.git@22.08-win
+pip install git+https://github.com/PrismPipeline/MaterialX_build.git@1.38.3-win
 ```
+
+### From Zip
+For Windows a zip containing QuiltiX and all required dependencies can be downloaded from [here](https://prism-pipeline.com/quiltix/).  
+Just extract and execute the `QuiltiX.bat`
+
 ### From Source
 1) Clone the repository
 
@@ -57,21 +68,18 @@ cd QuiltiX
 This will install the base python dependencies, excluding any development dependencies, MaterialX & USD
 
 ```
-pip install -e . 
+pip install . 
 ```
 
 <details>
   <summary>Additional install options</summary>
 
-If you want to just install everything (Python dependencies, dev dependencies, MaterialX & USD)
+If you want want to contribute it is recommended to install QuiltiX in [development/editable mode](https://setuptools.pypa.io/en/latest/userguide/development_mode.html).  
+It is also recommended to also install QuiltiX's dev dependencies.
 ```
-pip install -e .[all]
+pip install -e .[dev]
 ```
 
-These are the additional install options available
-```
-pip install -e .[usd,materialx,dev]
-```
 For more information see [pyproject.toml](pyproject.toml)
 </details>
 
@@ -79,8 +87,10 @@ For more information see [pyproject.toml](pyproject.toml)
 ## Running QuiltiX
 
 ```
-python -m QuiltiX 
+python -m QuiltiX
 ```
+
+Or if you installed QuiltiX via zip you can execute the `QuiltiX.bat` after extracting.
 
 ### Running QuiltiX using hython
 
@@ -102,7 +112,7 @@ Or if you have a virtual environment
 ```shell
 cd QuiltiX_root
 /path/to/venv/Scripts/activate
-set PYTHONPATH=%PYTHONPATH%;%VIRTUAL_ENV%;./src
+set PYTHONPATH=%PYTHONPATH%;%VIRTUAL_ENV%/Lib/site-packages;./src
 /path/to/hython.exe -c "from QuiltiX import quiltix;quiltix.launch()"
 ```
 > Note that currently both the Storm as well as HoudiniGL render delegates do not seem to work in QuiltiX when being launched from hython.
@@ -125,7 +135,7 @@ Overview over the most important Environment Variables:
 
 
 **_What is a Hdyra Delegate?_**  
-"Hydra Render Delegates are bridges between the Hydra viewport and a renderer. They were created by Pixar as part of the Hydra renderer used in usdview. The Hydra Render Delegate system allows the ability to switch out the backend renderer for the viewport data in Hydra. [...]"<sup>[[src]](https://learn.foundry.com/katana/dev-guide/Plugins/HydraRenderDelegates/Introduction.html#what-is-a-hydra-render-delegate)</sup>
+"Hydra Render Delegates are bridges between the Hydra viewport and a renderer. [...] The Hydra Render Delegate system allows the ability to switch out the backend renderer for the viewport data in Hydra. [...]"<sup>[[src]](https://learn.foundry.com/katana/dev-guide/Plugins/HydraRenderDelegates/Introduction.html#what-is-a-hydra-render-delegate)</sup>
 
 The [Storm Hydra Delegate](https://openusd.org/dev/api/hd_storm_page_front.html) by Pixar is both shipped with USD and enabled per default in QuiltiX. 
 
@@ -176,6 +186,8 @@ After opening QuiltiX the active Hydra delegate can be changed in the "View" -> 
 
 To add custom MaterialX node defintions they can be added by adding the location of the node definition files to the `PXR_MTLX_PLUGIN_SEARCH_PATHS` environment variable.
 
+## Platform support
+QuiltiX has been developed with all platforms in mind, but has been developed on Windows. If you see any issues on another platform please open up an issue.
 
 ## Contributing
 

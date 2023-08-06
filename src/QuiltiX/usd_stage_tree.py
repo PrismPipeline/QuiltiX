@@ -7,8 +7,8 @@ from pxr import Usd, UsdGeom
 from QuiltiX import usd_stage
 from QuiltiX.constants import ROOT
 
-EYE_VISABLE = os.path.join(ROOT, "src", "QuiltiX", "resources", "icons", "eye_visible.svg")
-EYE_INVISABLE = os.path.join(ROOT, "src", "QuiltiX", "resources", "icons", "eye_invisible.svg")
+EYE_VISABLE = os.path.join(ROOT, "resources", "icons", "eye_visible.svg")
+EYE_INVISABLE = os.path.join(ROOT, "resources", "icons", "eye_invisible.svg")
 
 
 class PrimVisButton(QtWidgets.QToolButton):

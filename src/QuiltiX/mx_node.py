@@ -10,6 +10,7 @@ class MxStdLibNotFoundError(Exception):
     def __init__(self):
         super().__init__("Could not find MaterialX StdLib")
 
+
 def is_mx_version_higher_than(major, minor, patch):
     mx_major, x_minor, mx_patch = mx.getVersionIntegers()
     if mx_major < major:
@@ -19,6 +20,7 @@ def is_mx_version_higher_than(major, minor, patch):
     if mx_patch < patch:
         return False
     return True
+
 
 def get_mx_stdlib_paths():
     """Get the path to the stdlib of MaterialX definitions. This directory is the parent of the "libraries" directory
@@ -39,7 +41,7 @@ def get_mx_stdlib_paths():
     def recurse_find_mx_stdlib_in_dir(root_dir):
         for (root, dirs, _) in os.walk(root_dir):
             if Path(root).name == "libraries" and stdlib_namespaces.issubset(dirs):
-                return Path(root).parent.as_posix()
+                return Path(root).as_posix()
 
     # TODO: which env vars are the needed ones?
     # MATERIALX_STDLIB_DIR, PXR_MTLX_STDLIB_SEARCH_PATHS, PXR_USDMTLX_STDLIB_SEARCH_PATHS
@@ -51,15 +53,21 @@ def get_mx_stdlib_paths():
         return paths
 
     # Deal with quiltix being called from hython
+    # will result in '{houdini_install_dir}/houdini/materialx/libraries'
     if Path(sys.executable).stem == "hython":
-        return [Path(Path(sys.executable).parent.parent, "houdini", "materialx").as_posix()]
-
-    if is_mx_version_higher_than(1, 38, 7):
-        return [mx.getDefaultDataSearchPath()]
+        return [Path(Path(sys.executable).parent.parent, "houdini", "materialx", "libraries").as_posix()]
 
     import pxr  # type: ignore
-    if pxr_stdlib := recurse_find_mx_stdlib_in_dir(os.path.dirname(pxr.__file__)):
+    usd_root = os.path.dirname(pxr.__file__)  # flat pxr module
+    if pxr_stdlib := recurse_find_mx_stdlib_in_dir(usd_root):
         return [pxr_stdlib]
+
+    usd_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(pxr.__file__))))
+    if pxr_stdlib := recurse_find_mx_stdlib_in_dir(usd_root):
+        return [pxr_stdlib]
+
+    if is_mx_version_higher_than(1, 38, 7):
+        return [mx.getDefaultDataSearchPath().asString()]
 
     if mx_stdlib := recurse_find_mx_stdlib_in_dir(os.path.dirname(mx.__file__)):
         return [mx_stdlib]

@@ -48,7 +48,7 @@ class StageViewWidget(QWidget):
         # if not stage:
         #     stage = create_empty_stage()
 
-        hdri_path = os.path.join(ROOT, "src", "QuiltiX", "resources", "hdris", "dreifaltigkeitsberg_1k.hdr")
+        hdri_path = os.path.join(ROOT, "resources", "hdris", "dreifaltigkeitsberg_1k.hdr")
         self.set_hdri(hdri_path)
         if stage:
             self.set_stage(stage)
@@ -107,6 +107,9 @@ class StageViewWidget(QWidget):
         self.set_stage(stage)
 
     def get_current_renderer(self):
+        if not self.view._renderer:
+            return
+
         return self.view._renderer.GetCurrentRendererId()
 
     def get_current_renderer_name(self):

@@ -54,7 +54,7 @@ class QuiltiXWindow(QMainWindow):
         self.viewer_enabled = True
         self.stage_ctrl = usd_stage.MxStageController(self)
 
-        quiltix_logo_path = os.path.join(ROOT, "src", "QuiltiX", "resources", "icons", "quiltix-logo-x.png")
+        quiltix_logo_path = os.path.join(ROOT, "resources", "icons", "quiltix-logo-x.png")
         quiltix_icon = QtGui.QIcon(QtGui.QPixmap(quiltix_logo_path))
         self.setWindowIcon(quiltix_icon)
         self.init_ui()
@@ -83,12 +83,9 @@ class QuiltiXWindow(QMainWindow):
     def load_default_graph(self):
         mx_file = os.path.join(
             ROOT,
-            "src",
-            "QuiltiX",
             "resources",
             "materials",
-            "Tiles_Black_Long_Variative_1k_8b",
-            "Tiles_Black_Long_Variative.mtlx",
+            "standard_surface.mtlx"
         )
         if not os.path.exists(mx_file):
             return
@@ -96,8 +93,7 @@ class QuiltiXWindow(QMainWindow):
         self.qx_node_graph.load_graph_from_mx_file(mx_file)
 
     def load_shaderball(self):
-        stage_file = os.path.join(ROOT, "src", "QuiltiX", "resources", "geometry", "matx_shaderball_uv.usdc")
-        # stage_file = os.path.join(ROOT, "src", "QuiltiX", "resources", "geometry", "StandardShaderBall", "layers", "shaderball.usda")
+        stage_file = os.path.join(ROOT, "resources", "geometry", "matx_shaderball_uv.usdc")
         stage = usd_stage.get_stage_from_file(stage_file)
         self.stage_ctrl.set_stage(stage)
 
@@ -217,11 +213,11 @@ class QuiltiXWindow(QMainWindow):
         return usd_stage_view.StageViewWidget()
 
     def loadStylesheet(self):
-        stylesheet_file = os.path.join(ROOT, "src", "QuiltiX", "style.qss")
+        stylesheet_file = os.path.join(ROOT, "style.qss")
         with open(stylesheet_file, "r", errors="ignore") as f:
             stylesheet = f.read()
 
-        stylesheet = stylesheet.replace("url(\"src", "url(\"{}/src".format(ROOT.replace("\\", "/")))
+        stylesheet = stylesheet.replace("url(\"", "url(\"{}/".format(ROOT.replace("\\", "/")))
         self.setStyleSheet(stylesheet)
 
     def setStyleSheet(self, stylesheet):
@@ -337,6 +333,11 @@ class QuiltiXWindow(QMainWindow):
         self.act_apply_mat.setChecked(True)
         self.options_menu.addAction(self.act_apply_mat)
 
+        self.act_ng_abstraction = QAction("Auto create Nodegraph around shader inputs", self)
+        self.act_ng_abstraction.setCheckable(True)
+        self.act_ng_abstraction.setChecked(True)
+        self.options_menu.addAction(self.act_ng_abstraction)
+
         self.act_validate = QAction("Validate MaterialX document...", self)
         self.act_validate.triggered.connect(self.validate)
         self.options_menu.addAction(self.act_validate)
@@ -422,7 +423,7 @@ class QuiltiXWindow(QMainWindow):
         # endregion Help
 
         # region Update
-        update_icon = QtGui.QIcon(os.path.join(ROOT, "src", "QuiltiX", "resources", "icons", "update.svg"))
+        update_icon = QtGui.QIcon(os.path.join(ROOT, "resources", "icons", "update.svg"))
         self.act_update = QAction(update_icon, "", self)
         self.act_update.setShortcut(QtGui.QKeySequence(QtCore.Qt.Key_F5))
         self.menuBar().addAction(self.act_update)
@@ -463,7 +464,7 @@ class QuiltiXWindow(QMainWindow):
             start_path = self.geometry_selection_path
 
         if not start_path:
-            start_path = os.path.join(ROOT, "src", "QuiltiX", "resources", "materials")
+            start_path = os.path.join(ROOT, "resources", "materials")
 
         path = self.request_filepath(
             title="Open MaterialX file",
@@ -483,7 +484,7 @@ class QuiltiXWindow(QMainWindow):
             start_path = self.geometry_selection_path
 
         if not start_path:
-            start_path = os.path.join(ROOT, "src", "QuiltiX", "resources", "materials")
+            start_path = os.path.join(ROOT, "resources", "materials")
 
         path = self.request_filepath(
             title="Save MaterialX file", start_path=start_path, file_filter="MaterialX files (*.mtlx)", mode="save"
@@ -584,7 +585,7 @@ class QuiltiXWindow(QMainWindow):
             start_path = self.mx_selection_path
 
         if not start_path:
-            start_path = os.path.join(ROOT, "src", "QuiltiX", "resources", "geometry")
+            start_path = os.path.join(ROOT, "resources", "geometry")
 
         path = self.request_filepath(
             title="Load geometry file",
@@ -605,7 +606,7 @@ class QuiltiXWindow(QMainWindow):
             start_path = self.mx_selection_path
 
         if not start_path:
-            start_path = os.path.join(ROOT, "src", "QuiltiX", "resources", "hdris")
+            start_path = os.path.join(ROOT, "resources", "hdris")
 
         path = self.request_filepath(
             title="Load HDRI file",
