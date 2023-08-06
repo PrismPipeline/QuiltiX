@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   deploy:
+    # TODO: Platform matrix
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3
