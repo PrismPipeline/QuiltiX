@@ -161,7 +161,7 @@ class QuiltiXWindow(QMainWindow):
             stage_view = StageView(dataModel=data_model)
 
             # region Stage View
-            self.stage_view_widget = usd_stage_view.StageViewWidget(data_model, stage_view)
+            self.stage_view_widget = self.get_stage_view_widget(data_model, stage_view)
             self.stage_view_widget.fileDropped.connect(self.on_view_file_dropped)
             self.stage_view_dock_widget = QDockWidget()
             self.stage_view_dock_widget.setWindowTitle("Viewport")
@@ -171,7 +171,7 @@ class QuiltiXWindow(QMainWindow):
             # endregion Stage View
 
             # region Render Settings
-            self.render_settings_widget = usd_render_settings.RenderSettingsWidget(stage_view)
+            self.render_settings_widget = self.get_render_settings_widget(stage_view)
             self.render_settings_dock_widget = QDockWidget()
             self.render_settings_dock_widget.setWindowTitle("Render Settings")
             self.render_settings_dock_widget.setWidget(self.render_settings_widget)
@@ -225,6 +225,12 @@ class QuiltiXWindow(QMainWindow):
 
     def get_stage_tree_widget(self):
         return usd_stage_tree.UsdStageTreeWidget()
+
+    def get_stage_view_widget(self, data_model, stage_view):
+        return usd_stage_view.StageViewWidget(data_model, stage_view)
+
+    def get_render_settings_widget(self, stage_view):
+        return usd_render_settings.RenderSettingsWidget(stage_view)
 
     def loadStylesheet(self):
         stylesheet_file = os.path.join(ROOT, "style.qss")
