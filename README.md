@@ -141,7 +141,7 @@ The [Storm Hydra Delegate](https://openusd.org/dev/api/hd_storm_page_front.html)
 
 > ❗Adding additional Hydra delegates can, depending on the renderer, be a non-trivial task due to the need of matching USD (and potentially MaterialX) versions for the compiled binaries. Some renderers also need additional configuration for additional features like renderer specific procedurals or shaders.
 
-To register a Hydra renderer plugin the Hydra plugin directory of the renderer needs to be added to the `PXR_PLUGINPATH_NAME` environment variable. Generally renderers also need their binaries added to the `PATH` enviornment variable, but there might be additional variables for licensing or additional features.  
+To register a Hydra renderer plugin the Hydra plugin directory of the renderer needs to be added to the `PXR_PLUGINPATH_NAME` environment variable. Generally renderers also need their binaries added to the `PATH` environment variable, but there might be additional variables for licensing or additional features.  
 
 Below is a non-exhaustive list of install instructions for Hydra renderers.
 
@@ -158,7 +158,7 @@ To use Arnold in QuiltiX we require
 The SDK (v7.2.1.0) can be downloaded from [here](https://arnoldrenderer.com/download/product-download/?id=5408). Extract it to a favoured directory.  
 To install a compiled version of arnold-usd one can download it from [here](#TODO)(v7.2.1.0) or install from [source](https://github.com/Autodesk/arnold-usd)
 
-Afterward couple of enviornment variables need to be set
+Afterward couple of environment variables need to be set
 ```shell
 set PATH=%PATH%;SDK_EXTRACT_DIR/bin
 set PXR_PLUGINPATH_NAME=%PXR_PLUGINPATH_NAME%;ARNOLD_USD_DIR/plugin
