@@ -168,9 +168,6 @@ class QuiltiXWindow(QMainWindow):
             self.render_settings_dock_widget.setWindowTitle("Render Settings")
             self.render_settings_dock_widget.setWidget(self.render_settings_widget)
             self.render_settings_dock_widget.setAllowedAreas(QtCore.Qt.AllDockWidgetAreas)
-            self.render_settings_dock_widget.setVisible(True)
-            self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.render_settings_dock_widget)
-
             self.splitDockWidget(self.stage_tree_dock_widget, self.render_settings_dock_widget, QtCore.Qt.Vertical)
             # endregion Render Settings
 

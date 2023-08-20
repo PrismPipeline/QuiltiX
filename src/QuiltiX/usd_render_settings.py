@@ -4,24 +4,20 @@ from QuiltiX.constants import VALUE_DECIMALS
 
 from pxr.Usdviewq.stageView import UsdImagingGL  # type: ignore
 
-# Inherit from _PropertiesList so the layouts & styling are the same
-class RenderSettingsWidget(node_property_widgets._PropertiesList):
+
+class RenderSettingsWidget(QtWidgets.QWidget):
     def __init__(self, stage_view, window_title="Render Settings"):
         super(RenderSettingsWidget, self).__init__()
         self.stage_view = stage_view
-
-        # Imitate node_property_widgets._PropertiesContainer
         self._main_widget = QtWidgets.QWidget()
-        self._main_grid_layout = QtWidgets.QGridLayout()
-        self._main_grid_layout.setColumnStretch(1, 1)
-        self._main_grid_layout.setSpacing(6)
+        self._main_grid_layout = QtWidgets.QGridLayout(self._main_widget)
 
-        layout = QtWidgets.QVBoxLayout(self._main_widget)
-        layout.setAlignment(QtCore.Qt.AlignTop)
-        layout.addLayout(self._main_grid_layout)
-
-        self.insertRow(0)
-        self.setCellWidget(0, 0, self._main_widget)
+        self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
+        self.lo_main = QtWidgets.QHBoxLayout(self)
+        self.sa_main = QtWidgets.QScrollArea()
+        self.sa_main.setWidget(self._main_widget)
+        self.sa_main.setWidgetResizable(True)
+        self.lo_main.addWidget(self.sa_main)
 
     def on_renderer_changed(self):
         self._clear_widgets()
@@ -97,5 +93,3 @@ class RenderSettingsWidget(node_property_widgets._PropertiesList):
                 )
 
                 self._main_grid_layout.addWidget(lineEdit, i, 1)
-
-        # FIXME: make sure the widget renders. somehow the widget or its contents only render after resizing??
