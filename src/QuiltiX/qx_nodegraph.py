@@ -717,7 +717,6 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                 if cur_mx_node.hasAttribute("xpos") and cur_mx_node.hasAttribute("ypos"):
                     had_pos = True
 
-                self.patch_relative_file_path_inputs(cur_mx_node, base_dir)
                 cur_qx_node = self.create_node_from_mx_node(cur_mx_node)
 
                 qx_node_to_mx_node[cur_qx_node] = cur_mx_node
@@ -725,7 +724,6 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             for mx_graph in doc.getNodeGraphs():
                 ng_node = self.create_nodegraph_from_mx_nodegraph(mx_graph)
                 for cur_mx_node in mx_graph.getNodes():
-                    self.patch_relative_file_path_inputs(cur_mx_node, base_dir)
                     cur_qx_node = self.create_node_from_mx_node(cur_mx_node, graph=ng_node.get_sub_graph())
                     # Change value type of node
                     qx_node_to_mx_node[cur_qx_node] = cur_mx_node
