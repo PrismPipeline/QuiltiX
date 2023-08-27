@@ -211,13 +211,12 @@ class QuiltiXWindow(QMainWindow):
         self.qx_node_graph_widget.setFocus()
 
     def on_mx_file_loaded(self, path):
+        self.set_current_filepath(path)
         graph_data = self.qx_node_graph.get_mx_xml_data_from_graph()
         self.stage_ctrl.refresh_mx_file(graph_data, emit=False)
         if self.act_apply_mat.isChecked():
             self.stage_ctrl.apply_first_material_to_all_prims()
         self.stage_tree_widget.refresh_tree()
-
-        self.set_current_filepath(path)
 
     def on_node_graph_changed(self, nodegraph):
         if self.act_apply_mat.isChecked():

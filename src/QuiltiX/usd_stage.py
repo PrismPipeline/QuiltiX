@@ -122,6 +122,12 @@ class MxStageController(QtCore.QObject):
         if in_memory:
             idf = "_tmp_quiltix_graph.mtlx"
             layer = Sdf.Layer.CreateAnonymous(idf)
+            cur_path = self.editor.current_filepath
+            if cur_path and cur_path != "untitled":
+                # allows relative filepaths
+                idf = os.path.join(os.path.dirname(cur_path), "_tmp_quiltix_graph.mtlx")
+                layer.identifier = idf
+
             idf = layer.identifier
             layer.ImportFromString(mx_data)
         else:
