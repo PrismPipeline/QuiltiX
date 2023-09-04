@@ -1,95 +1,107 @@
 from Qt import QtWidgets, QtCore  # type: ignore
-from NodeGraphQt.custom_widgets.properties_bin import node_property_widgets
 from QuiltiX.constants import VALUE_DECIMALS
 
 from pxr.Usdviewq.stageView import UsdImagingGL  # type: ignore
 
-
+# Inherit from _PropertiesList so the layouts & styling are the same
 class RenderSettingsWidget(QtWidgets.QWidget):
     def __init__(self, stage_view, window_title="Render Settings"):
         super(RenderSettingsWidget, self).__init__()
         self.stage_view = stage_view
-        self._main_widget = QtWidgets.QWidget()
-        self._main_grid_layout = QtWidgets.QGridLayout(self._main_widget)
+
+        # layout_root > scroll_area > scroll_area_main_widget > scroll_area_main_layout > grid_layout
+        self.layout_root = QtWidgets.QHBoxLayout(self)
+        self.scroll_area = QtWidgets.QScrollArea()
+        self.layout_root.addWidget(self.scroll_area)
+        self.scroll_area_main_widget = QtWidgets.QWidget()
+        self.scroll_area.setWidget(self.scroll_area_main_widget)
+        self.scroll_area_main_layout = QtWidgets.QVBoxLayout()
+        self.scroll_area_main_widget.setLayout(self.scroll_area_main_layout)
+        self.grid_layout = QtWidgets.QGridLayout()
+        self.scroll_area_main_layout.addLayout(self.grid_layout)
+
+        self.scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setWidgetResizable(True)
+
+        self.scroll_area_main_layout.setAlignment(QtCore.Qt.AlignTop)
+
+        # TODO enable both columns to be resized simultaneously
+        self.grid_layout.setSpacing(6)
 
         self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
-        self.lo_main = QtWidgets.QHBoxLayout(self)
-        self.sa_main = QtWidgets.QScrollArea()
-        self.sa_main.setWidget(self._main_widget)
-        self.sa_main.setWidgetResizable(True)
-        self.lo_main.addWidget(self.sa_main)
+    
+    def sizeHint(self):
+        return QtCore.QSize(250, 250)
 
     def on_renderer_changed(self):
         self._clear_widgets()
         self._populate_widgets()
 
     def _clear_widgets(self):
-        for i in reversed(range(self._main_grid_layout.count())):
-            item_to_remove = self._main_grid_layout.itemAt(i)
+        for i in reversed(range(self.grid_layout.count())):
+            item_to_remove = self.grid_layout.itemAt(i)
             if item_to_remove:
                 widget_to_remove = item_to_remove.widget()
                 if widget_to_remove:
-                    self._main_grid_layout.removeWidget(widget_to_remove)
+                    self.grid_layout.removeWidget(widget_to_remove)
                     widget_to_remove.deleteLater()
 
     def _populate_widgets(self):
         settings = self.stage_view.GetRendererSettingsList()
-
         label_flags = QtCore.Qt.AlignCenter | QtCore.Qt.AlignRight
 
-        for i, setting in enumerate(settings):
-            label = f"{str(setting.key)}: "
-            value = self.stage_view.GetRendererSetting(setting.key)
-            self._main_grid_layout.addWidget(QtWidgets.QLabel(label), i, 0, label_flags)
+        for row, setting in enumerate(settings):
+            label_widget = QtWidgets.QLabel(f"{str(setting.key)}: ")
+            self.grid_layout.addWidget(label_widget, row, 0, label_flags)
+            
+            value_widget = self._create_value_widget(setting)
+            self.grid_layout.addWidget(value_widget, row, 1)
 
-            if setting.type == UsdImagingGL.RendererSettingType.FLAG:
-                checkBox = QtWidgets.QCheckBox(self._main_widget)
+    def _create_value_widget(self, renderer_setting):
+        value = self.stage_view.GetRendererSetting(renderer_setting.key)
 
-                checkBox.setChecked(value)
+        if renderer_setting.type == UsdImagingGL.RendererSettingType.FLAG:
+            value_widget = QtWidgets.QCheckBox()
 
-                checkBox.toggled.connect(lambda v, setting=setting: self.stage_view.SetRendererSetting(setting.key, v))
+            value_widget.setChecked(value)
 
-                self._main_grid_layout.addWidget(checkBox, i, 1)
+            value_widget.toggled.connect(lambda v, setting=renderer_setting:
+                self.stage_view.SetRendererSetting(renderer_setting.key, v))
 
-            elif setting.type == UsdImagingGL.RendererSettingType.INT:
-                spinBox = QtWidgets.QSpinBox(self._main_widget)
-                spinBox.wheelEvent = lambda _: None
+        elif renderer_setting.type == UsdImagingGL.RendererSettingType.INT:
+            value_widget = QtWidgets.QSpinBox()
+            value_widget.wheelEvent = lambda _: None
 
-                spinBox.setMinimum(-(2**31))
-                spinBox.setMaximum(2**31 - 1)
+            value_widget.setMinimum(-(2**31))
+            value_widget.setMaximum(2**31 - 1)
 
-                spinBox.setValue(self.stage_view.GetRendererSetting(setting.key))
+            value_widget.setValue(self.stage_view.GetRendererSetting(renderer_setting.key))
 
-                spinBox.valueChanged.connect(
-                    lambda v, setting=setting: self.stage_view.SetRendererSetting(setting.key, v)
-                )
+            value_widget.valueChanged.connect(
+                lambda v, setting=renderer_setting: self.stage_view.SetRendererSetting(renderer_setting.key, v)
+            )
 
-                self._main_grid_layout.addWidget(QtWidgets.QLabel(label), i, 0, label_flags)
-                self._main_grid_layout.addWidget(spinBox, i, 1)
+        elif renderer_setting.type == UsdImagingGL.RendererSettingType.FLOAT:
+            value_widget = QtWidgets.QDoubleSpinBox()
+            value_widget.wheelEvent = lambda _: None
 
-            elif setting.type == UsdImagingGL.RendererSettingType.FLOAT:
-                spinBox = QtWidgets.QDoubleSpinBox(self._main_widget)
-                spinBox.wheelEvent = lambda _: None
+            value_widget.setDecimals(VALUE_DECIMALS)
+            value_widget.setMinimum(-(2**31))
+            value_widget.setMaximum(2**31 - 1)
 
-                spinBox.setDecimals(VALUE_DECIMALS)
-                spinBox.setMinimum(-(2**31))
-                spinBox.setMaximum(2**31 - 1)
+            value_widget.setValue(self.stage_view.GetRendererSetting(renderer_setting.key))
 
-                spinBox.setValue(self.stage_view.GetRendererSetting(setting.key))
+            value_widget.valueChanged.connect(
+                lambda v, setting=renderer_setting: self.stage_view.SetRendererSetting(renderer_setting.key, v)
+            )
 
-                spinBox.valueChanged.connect(
-                    lambda v, setting=setting: self.stage_view.SetRendererSetting(setting.key, v)
-                )
+        elif renderer_setting.type == UsdImagingGL.RendererSettingType.STRING:
+            value_widget = QtWidgets.QLineEdit()
 
-                self._main_grid_layout.addWidget(spinBox, i, 1)
+            value_widget.setText(self.stage_view.GetRendererSetting(renderer_setting.key))
 
-            elif setting.type == UsdImagingGL.RendererSettingType.STRING:
-                lineEdit = QtWidgets.QLineEdit(self._main_widget)
+            value_widget.textChanged.connect(
+                lambda v, setting=renderer_setting: self.stage_view.SetRendererSetting(renderer_setting.key, v)
+            )
 
-                lineEdit.setText(self.stage_view.GetRendererSetting(setting.key))
-
-                lineEdit.textChanged.connect(
-                    lambda v, setting=setting: self.stage_view.SetRendererSetting(setting.key, v)
-                )
-
-                self._main_grid_layout.addWidget(lineEdit, i, 1)
+        return value_widget
