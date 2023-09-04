@@ -147,6 +147,8 @@ class QuiltiXWindow(QMainWindow):
         self.qx_node_graph_widget.setStyleSheet("")
         # endregion Qx Node Graph
 
+        self.setDockNestingEnabled(True)
+
         # region Stage Tree
         self.stage_tree_widget = self.get_stage_tree_widget()
         self.stage_tree_dock_widget = QDockWidget()
@@ -160,6 +162,15 @@ class QuiltiXWindow(QMainWindow):
             data_model = StageView.DefaultDataModel()
             stage_view = StageView(dataModel=data_model)
 
+            # region Render Settings
+            self.render_settings_widget = self.get_render_settings_widget(stage_view)
+            self.render_settings_dock_widget = QDockWidget()
+            self.render_settings_dock_widget.setWindowTitle("Render Settings")
+            self.render_settings_dock_widget.setWidget(self.render_settings_widget)
+            self.render_settings_dock_widget.setAllowedAreas(QtCore.Qt.AllDockWidgetAreas)
+            self.splitDockWidget(self.stage_tree_dock_widget, self.render_settings_dock_widget, QtCore.Qt.Vertical)
+            # endregion Render Settings
+
             # region Stage View
             self.stage_view_widget = self.get_stage_view_widget(data_model, stage_view)
             self.stage_view_widget.fileDropped.connect(self.on_view_file_dropped)
@@ -168,19 +179,9 @@ class QuiltiXWindow(QMainWindow):
             self.stage_view_dock_widget.setWidget(self.stage_view_widget)
             self.stage_view_dock_widget.setAllowedAreas(QtCore.Qt.AllDockWidgetAreas)
             self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.stage_view_dock_widget)
-            # endregion Stage View
-
-            # region Render Settings
-            self.render_settings_widget = self.get_render_settings_widget(stage_view)
-            self.render_settings_dock_widget = QDockWidget()
-            self.render_settings_dock_widget.setWindowTitle("Render Settings")
-            self.render_settings_dock_widget.setWidget(self.render_settings_widget)
-            self.render_settings_dock_widget.setAllowedAreas(QtCore.Qt.AllDockWidgetAreas)
-            self.render_settings_dock_widget.setVisible(False)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.render_settings_dock_widget)
 
             self.stage_view_widget.rendererChanged.connect(self.render_settings_widget.on_renderer_changed)
-            # endregion Render Settings
+            # endregion Stage View
 
         # region Properties
         self.properties = PropertiesBinWidget(root_node_graph=self.qx_node_graph)
@@ -457,6 +458,7 @@ class QuiltiXWindow(QMainWindow):
     def on_view_menu_showing(self):
         self.act_prop.setChecked(self.properties_dock_widget.isVisible())
         self.act_scenegraph.setChecked(self.stage_tree_dock_widget.isVisible())
+        self.act_render_settings.setChecked(self.render_settings_dock_widget.isVisible())
         if self.viewer_enabled:
             self.act_viewport.setChecked(self.stage_view_dock_widget.isVisible())
 
@@ -649,6 +651,7 @@ class QuiltiXWindow(QMainWindow):
 
     def on_render_settings_toggled(self, checked):
         self.render_settings_dock_widget.setVisible(checked)
+        self.render_settings_widget.on_renderer_changed()
 
     def on_scenegraph_toggled(self, checked):
         self.stage_tree_dock_widget.setVisible(checked)
