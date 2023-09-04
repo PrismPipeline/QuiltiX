@@ -1,7 +1,8 @@
-<p align="center">
-  <img src="media/quiltix-logo-full.svg#gh-dark-mode-only" height="170" />
-  <img src="media/quiltix-logo-full-light-mode.svg#gh-light-mode-only" height="200" />
-</p>
+<p align="center"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/PrismPipeline/QuiltiX/main/media/quiltix-logo-full.svg" height="170">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/PrismPipeline/QuiltiX/main/media/quiltix-logo-full-light-mode.svg" height="200">
+  <img alt="QuiltiX" src="https://raw.githubusercontent.com/PrismPipeline/QuiltiX/main/media/quiltix-logo-full-light-mode.svg">
+</picture></p>
 
 ----  
 
@@ -13,7 +14,7 @@
 
 QuiltiX is a graphical node editor to edit, and author [MaterialX](https://materialx.org/) based materials of 3D assets. It includes a viewport based on [OpenUSD](https://www.openusd.org/release/index.html)'s [Hydra](https://openusd.org/release/glossary.html#hydra), which enables viewing your assets in any renderer supporting both Hydra & MaterialX.
 
-<img align="center" padding=5 src="media/QuiltiX.png"> 
+<img align="center" padding=5 src="https://raw.githubusercontent.com/PrismPipeline/QuiltiX/main/media/QuiltiX.png"> 
 
 ## Table of Contents  <!-- omit from toc -->
 
@@ -44,7 +45,7 @@ pip install QuiltiX
 ```
 
 If you additionally require pre-built binaries for MaterialX & USD we currently provide these for Windows.
-On Linux you need to provide your own binaries for now. Here are linked instructions for [MaterialX](https://github.com/AcademySoftwareFoundation/MaterialX/tree/main#quick-start-for-developers) & [OpenUSD](https://github.com/PixarAnimationStudios/OpenUSD/blob/release/BUILDING.md)
+On Linux/Mac you need to provide your own binaries for now. Here are linked instructions for [MaterialX](https://github.com/AcademySoftwareFoundation/MaterialX/tree/main#quick-start-for-developers) & [OpenUSD](https://github.com/PixarAnimationStudios/OpenUSD/blob/release/BUILDING.md)
 ```shell
 pip install QuiltiX
 pip install git+https://github.com/PrismPipeline/OpenUSD_build.git@22.08-win
@@ -139,7 +140,7 @@ Overview over the most important Environment Variables:
 
 The [Storm Hydra Delegate](https://openusd.org/dev/api/hd_storm_page_front.html) by Pixar is both shipped with USD and enabled per default in QuiltiX. 
 
-> ❗Adding additional Hydra delegates can, depending on the renderer, be a non-trivial task due to the need of matching USD (and potentially MaterialX) versions for the compiled binaries. Some renderers also need additional configuration for additional features like renderer specific procedurals or shaders.
+> Adding additional Hydra delegates can, depending on the renderer, be a non-trivial task due to the need of matching USD (and potentially MaterialX) versions for the compiled binaries. Some renderers also need additional configuration for additional features like renderer specific procedurals or shaders.
 
 To register a Hydra renderer plugin the Hydra plugin directory of the renderer needs to be added to the `PXR_PLUGINPATH_NAME` environment variable. Generally renderers also need their binaries added to the `PATH` environment variable, but there might be additional variables for licensing or additional features.  
 
