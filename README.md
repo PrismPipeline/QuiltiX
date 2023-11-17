@@ -48,8 +48,7 @@ If you additionally require pre-built binaries for MaterialX & USD we currently 
 On Linux/Mac you need to provide your own binaries for now. Here are linked instructions for [MaterialX](https://github.com/AcademySoftwareFoundation/MaterialX/tree/main#quick-start-for-developers) & [OpenUSD](https://github.com/PixarAnimationStudios/OpenUSD/blob/release/BUILDING.md)
 ```shell
 pip install QuiltiX
-pip install git+https://github.com/PrismPipeline/OpenUSD_build.git@22.08-win
-pip install git+https://github.com/PrismPipeline/MaterialX_build.git@1.38.3-win
+pip install git+https://github.com/PrismPipeline/OpenUSD_build.git@23.11-win-mtlx-1.38.8
 ```
 
 ### From Zip
@@ -157,7 +156,8 @@ To use Arnold in QuiltiX we require
   <summary>Full Arnold install instructions</summary>
 
 The SDK (v7.2.1.0) can be downloaded from [here](https://arnoldrenderer.com/download/product-download/?id=5408). Extract it to a favoured directory.  
-To install a compiled version of arnold-usd one can download it from [here](#TODO)(v7.2.1.0) or install from [source](https://github.com/Autodesk/arnold-usd)
+<!-- To install a compiled version of arnold-usd one can download it from [here](#TODO)(v7.2.1.0) or install from [source](https://github.com/Autodesk/arnold-usd) -->
+To install arnold-usd one can build from source [here](https://github.com/Autodesk/arnold-usd). Hopefully soon, we will be able to provide a seperate download for arnold-usd ourselves. See [here](https://github.com/PrismPipeline/QuiltiX/issues/36) for more info.
 
 Afterward couple of environment variables need to be set
 ```shell
