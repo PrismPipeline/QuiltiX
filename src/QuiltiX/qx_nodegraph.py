@@ -533,6 +533,8 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                 else:
                     mx_input_type = mx_def.getActiveInput(input_data["name"]).getType()
 
+                if input_data["name"] == "texcoord" and val == (0.0, 0.0):
+                    continue
 
                 # temporary fix to avoid displacement validation warning
                 if node_data["type_"] == "Material.Surfacematerial" and input_data["name"] == "displacementshader":
