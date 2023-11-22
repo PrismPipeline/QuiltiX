@@ -490,9 +490,12 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                         output = mx_node.addOutput(
                             port_data["name"], port_type
                         )
-                        output.setConnectedNode(
-                            qx_node_ids_to_mx_nodes[connected_data[0]]
-                        )
+                        mx_node = qx_node_ids_to_mx_nodes[connected_data[0]]
+                        if mx_node.getType() == "multioutput":
+                            con_output = mx_node.getActiveOutput(connected_data[1])
+                            output.setConnectedOutput(con_output)
+                        else:
+                            output.setConnectedNode(mx_node)
 
             elif node_data["type_"] in ["Inputs.QxPortInputNode", "Outputs.QxPortOutputNode"]:
                 continue
@@ -503,13 +506,13 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                     mx_node = main_mx_node_graph.addNode(
                         mx_def.getNodeString(),
                         node_data["name"],
-                        mx_def.getActiveOutputs()[0].getType(),
+                        mx_def.getType(),
                     )
                 else:
                     mx_node = mx_parent.addNode(
                         mx_def.getNodeString(),
                         node_data["name"],
-                        mx_def.getActiveOutputs()[0].getType(),
+                        mx_def.getType(),
                     )
             else:
                 logger.warning("node has no outputs: %s" % mx_def.getNodeString())
@@ -533,7 +536,6 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                 else:
                     mx_input_type = mx_def.getActiveInput(input_data["name"]).getType()
 
-
                 # temporary fix to avoid displacement validation warning
                 if node_data["type_"] == "Material.Surfacematerial" and input_data["name"] == "displacementshader":
                     for connection in serialized_data.get("connections", []):
@@ -544,6 +546,13 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
                 mx_input = mx_node.addInput(input_data["name"], mx_input_type)
                 self.set_mx_input_value(mx_input, val)
+
+            for output_data in node_data.get("output_ports", {}):
+                if node_data["type_"] == "Other.QxGroupNode":
+                    continue
+                
+                mx_output_type = mx_def.getActiveOutput(output_data["name"]).getType()
+                mx_node.addOutput(output_data["name"], mx_output_type)
 
             qx_node_ids_to_mx_nodes[node_id] = mx_node
 
@@ -563,7 +572,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
                         connected_node_data = serialized_data["nodes"][connection["in"][0]]
                         connected_mx_def = self.get_mx_node_def(connected_node_data["type_"], connected_node_data.get("custom", {}).get("type"))
-                        connected_port_type = connected_mx_def.getActiveOutputs()[0].getType()
+                        connected_port_type = connected_mx_def.getType()
                         if connected_port_type in ("material", "surfaceshader"):
                             output_name = f"output_{node_data['name']}_{output_data['name']}"
                             if main_mx_node_graph.getOutput(output_name):
@@ -573,9 +582,13 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                                 output_name,
                                 mx_output_type,
                             )
-                            main_mx_node_graph_output.setConnectedNode(
-                                qx_node_ids_to_mx_nodes[node_id]
-                            )
+                            mx_node = qx_node_ids_to_mx_nodes[node_id]
+                            if mx_node.getType() == "multioutput":
+                                output = mx_node.getActiveOutput(connection["out"][1])
+                                main_mx_node_graph_output.setConnectedOutput(output)
+                            else:
+                                main_mx_node_graph_output.setConnectedNode(mx_node)
+
                             if node_id not in main_mx_node_graph_outputs:
                                 main_mx_node_graph_outputs[node_id] = {}
 
@@ -607,9 +620,12 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                     main_mx_node_graph_outputs[connection["out"][0]][connection["out"][1]]
                 )
             else:
-                mx_input.setConnectedNode(
-                    qx_node_ids_to_mx_nodes[connection["out"][0]]
-                )
+                mx_node = qx_node_ids_to_mx_nodes[connection["out"][0]]
+                if mx_node.getType() == "multioutput":
+                    output = mx_node.getActiveOutput(connection["out"][1])
+                    mx_input.setConnectedOutput(output)
+                else:
+                    mx_input.setConnectedNode(mx_node)
 
         return mx_parent
 
