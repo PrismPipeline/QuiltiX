@@ -697,20 +697,23 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             )
 
     def load_graph_from_mx_file(self, mx_file_path):
+        base_dir = os.path.dirname(os.path.abspath(mx_file_path))
+
+        doc = mx.createDocument()
+        # _libraryDir = os.path.join(os.path.join(self.core.extPath, "USD", "libraries"))
+        # _searchPath = _libraryDir + mx.PATH_LIST_SEPARATOR + _exampleDir
+        # _searchPath = _libraryDir
+
+        # mx.readFromXmlFile(doc, path, _searchPath)
+        mx.readFromXmlFile(doc, mx_file_path)
+        self.load_graph_from_mx_doc(doc, mx_file_path)
+
+    def load_graph_from_mx_doc(self, doc, mx_file_path):
         with self.get_root_graph().block_save():
             self.clear_session()
 
-            base_dir = os.path.dirname(os.path.abspath(mx_file_path))
-
-            doc = mx.createDocument()
-            # _libraryDir = os.path.join(os.path.join(self.core.extPath, "USD", "libraries"))
-            # _searchPath = _libraryDir + mx.PATH_LIST_SEPARATOR + _exampleDir
-            # _searchPath = _libraryDir
-
             had_pos = False
             qx_node_to_mx_node = {}
-            # mx.readFromXmlFile(doc, path, _searchPath)
-            mx.readFromXmlFile(doc, mx_file_path)
 
             # Create Nodes
             for cur_mx_node in doc.getNodes():
