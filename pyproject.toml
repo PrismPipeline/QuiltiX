@@ -1,6 +1,6 @@
 [project]
 name = "QuiltiX"
-version = "0.5.0"
+version = "0.5.1"
 description = "MaterialX Graphical Node Editor"
 readme = "README.md"
 license = {file = "LICENSE"}
