@@ -631,7 +631,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                 mx_input.setValueString(val)
                 mx_input.setAttribute("colorspace", "srgb_texture")
             else:
-                mx_input.setValue(val)
+                mx_input.setValue(val, mx_input_type)
 
     def get_current_graph_data(self):
         serialized_data = self.serialize_session()
