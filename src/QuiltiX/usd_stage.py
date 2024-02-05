@@ -195,6 +195,8 @@ class MxStageController(QtCore.QObject):
 
             if len(property_value) == 3:
                 property_value = Gf.Vec3f(property_value)
+            elif len(property_value) == 2:
+                property_value = Gf.Vec2f(property_value)                
 
         usdinput.GetAttr().Set(property_value)
         self.signal_stage_updated.emit()
