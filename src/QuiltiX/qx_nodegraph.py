@@ -706,9 +706,10 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
         # mx.readFromXmlFile(doc, path, _searchPath)
         mx.readFromXmlFile(doc, mx_file_path)
-        self.load_graph_from_mx_doc(doc, mx_file_path)
+        self.load_graph_from_mx_doc(doc)
+        self.mx_file_loaded.emit(mx_file_path)
 
-    def load_graph_from_mx_doc(self, doc, mx_file_path):
+    def load_graph_from_mx_doc(self, doc):
         with self.get_root_graph().block_save():
             self.clear_session()
 
@@ -742,8 +743,6 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
                 if not graph.is_root:
                     graph.parent_graph.collapse_group_node(graph.node)
-
-        self.mx_file_loaded.emit(mx_file_path)
 
     def load_image_file(self, filepath, xoffset=0, yoffset=0):
         local_pos = self.viewer().mapFromGlobal(QtGui.QCursor.pos())
