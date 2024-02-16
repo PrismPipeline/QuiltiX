@@ -490,12 +490,12 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                         output = mx_node.addOutput(
                             port_data["name"], port_type
                         )
-                        mx_node = qx_node_ids_to_mx_nodes[connected_data[0]]
+                        mx_sub_node = qx_node_ids_to_mx_nodes[connected_data[0]]
                         if mx_node.getType() == "multioutput":
-                            con_output = mx_node.getActiveOutput(connected_data[1])
+                            con_output = mx_sub_node.getActiveOutput(connected_data[1])
                             output.setConnectedOutput(con_output)
                         else:
-                            output.setConnectedNode(mx_node)
+                            output.setConnectedNode(mx_sub_node)
 
             elif node_data["type_"] in ["Inputs.QxPortInputNode", "Outputs.QxPortOutputNode"]:
                 continue
@@ -642,7 +642,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             val = mx.PyMaterialXCore.Color4(val)
 
         # We do not need to set a value if it is connected to a node
-        if val != "" or mx_input_type == "string":
+        if val != "" or mx_input_type in ["string", "filename"]:
             if mx_input_type == "filename":
                 mx_input.setValueString(val)
                 mx_input.setAttribute("colorspace", "srgb_texture")
@@ -787,7 +787,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
             mx_connected_node = mx_input.getConnectedNode()
             if mx_connected_node:
-                if mx_connected_port:
+                if mx_connected_port and mx_connected_port.getParent().CATEGORY == "nodegraph":
                     port_node = qx_input_node.get_sub_graph().get_output_port_nodes()[0]
                     qx_input_port = port_node.get_input(mx_connected_port.getName())
                     mx_input_node_name = mx_connected_node.getName()
