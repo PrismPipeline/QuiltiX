@@ -319,6 +319,10 @@ class QuiltiXWindow(QMainWindow):
         show_mx_text.triggered.connect(self.show_mx_text_triggered)
         self.file_menu.addAction(show_mx_text)
 
+        show_usd_text = QAction("Show USD as text...", self)
+        show_usd_text.triggered.connect(self.show_usd_text_triggered)
+        self.file_menu.addAction(show_usd_text)
+
         self.file_menu.addSeparator()
 
         show_mx_view = QAction("Open in MaterialX View...", self)
@@ -534,6 +538,27 @@ class QuiltiXWindow(QMainWindow):
         te_text.setReadOnly(True)
         te_text.setParent(self, QtCore.Qt.Window)
         te_text.setWindowTitle("MaterialX text preview")
+        te_text.resize(1000, 800)
+        te_text.show()
+
+    def print_usd_prim(self, prim):
+        assert isinstance(prim, Usd.Prim)
+        prim_stage = prim.GetStage()
+        prim_stage_id = prim_stage.GetRootLayer().identifier
+        stage = Usd.Stage.CreateInMemory()
+        target = stage.DefinePrim("/{}".format(prim.GetName()))
+        target.GetReferences().AddReference(prim_stage_id, prim.GetPath())        
+        return stage.ExportToString() 
+
+    def show_usd_text_triggered(self):
+        usdstage = self.stage_ctrl.stage
+        materials = usdstage.GetPrimAtPath("/MaterialX")
+        text = self.print_usd_prim(materials)
+        te_text = QTextEdit()
+        te_text.setText(text)
+        te_text.setReadOnly(True)
+        te_text.setParent(self, QtCore.Qt.Window)
+        te_text.setWindowTitle("USD text preview")
         te_text.resize(1000, 800)
         te_text.show()
 
