@@ -5,9 +5,9 @@ from QuiltiX.constants import ROOT
 from QuiltiX.usd_stage import set_pxr_mtlx_stdlib_search_paths
 from pxr.Usdviewq.stageView import StageView # type: ignore
 
-from Qt.QtCore import QSize  # type: ignore
-from Qt.QtCore import Qt, Signal  # type: ignore
-from Qt.QtWidgets import QVBoxLayout, QWidget  # type: ignore
+from qtpy.QtCore import QSize  # type: ignore
+from qtpy.QtCore import Qt, Signal  # type: ignore
+from qtpy.QtWidgets import QVBoxLayout, QWidget  # type: ignore
 
 set_pxr_mtlx_stdlib_search_paths()
 from QuiltiX.usd_stage import create_empty_stage, create_stage_with_hdri, get_stage_from_file # noqa: E402 

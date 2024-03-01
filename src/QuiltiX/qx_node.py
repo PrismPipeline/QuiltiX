@@ -1,7 +1,7 @@
 import random
 import logging
 
-from Qt import QtCore  # type: ignore
+from qtpy import QtCore  # type: ignore
 
 import MaterialX as mx  # type: ignore
 from NodeGraphQt import BaseNode, GroupNode

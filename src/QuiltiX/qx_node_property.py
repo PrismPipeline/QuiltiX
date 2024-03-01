@@ -8,9 +8,9 @@ from NodeGraphQt.custom_widgets.properties_bin import (
 )
 from NodeGraphQt.custom_widgets.properties_bin.node_property_factory import NodePropertyWidgetFactory
 from NodeGraphQt.custom_widgets.properties_bin.prop_widgets_base import PropLineEdit
-from Qt.QtCore import QSize, Qt, Signal, QEvent  # type: ignore
-from Qt.QtGui import QMouseEvent  # type: ignore
-from Qt.QtWidgets import (  # type: ignore
+from qtpy.QtCore import QSize, Qt, Signal, QEvent  # type: ignore
+from qtpy.QtGui import QMouseEvent  # type: ignore
+from qtpy.QtWidgets import (  # type: ignore
     QHBoxLayout,
     QLabel,
     QTableWidgetItem,

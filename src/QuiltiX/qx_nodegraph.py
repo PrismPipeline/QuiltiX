@@ -6,7 +6,7 @@ from contextlib import contextmanager
 
 import NodeGraphQt
 from NodeGraphQt.nodes.group_node import GroupNode
-from Qt import QtCore, QtGui, QtWidgets  # type: ignore
+from qtpy import QtCore, QtGui, QtWidgets  # type: ignore
 from QuiltiX.qx_nodegraph_viewer import QxNodeGraphViewer  
 
 import QuiltiX.qx_node as qx_node_module
@@ -114,10 +114,10 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         else:
             mx_defs = self.mx_library_doc.getNodeDefs()
 
+        new_defs = []
         if mx_defs:
-            self.register_nodes(
-                qx_node_module.qx_node_from_mx_node_group_dict_generator(mx_defs)
-            )
+            new_defs = qx_node_module.qx_node_from_mx_node_group_dict_generator(mx_defs)
+            self.register_nodes(new_defs)
 
             node_menu = self.context_nodes_menu()
             for mx_def in mx_defs:
@@ -132,6 +132,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                         )
 
         self.mx_defs = self.mx_library_doc.getNodeDefs()
+        return new_defs
 
     def has_nodegraph_implementation(self, mx_def):
         imp = mx_def.getImplementation()
@@ -705,6 +706,12 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         # _searchPath = _libraryDir
 
         # mx.readFromXmlFile(doc, path, _searchPath)
+        new_defs = self.load_mx_libraries([os.path.dirname(mx_file_path)])
+        if new_defs:
+            dirpath = os.path.dirname(mx_file_path)
+            if dirpath not in os.getenv("PXR_MTLX_PLUGIN_SEARCH_PATHS", "").split(os.pathsep):
+                os.environ["PXR_MTLX_PLUGIN_SEARCH_PATHS"] = os.getenv("PXR_MTLX_PLUGIN_SEARCH_PATHS", "") + os.pathsep + dirpath
+
         mx.readFromXmlFile(doc, mx_file_path)
         self.load_graph_from_mx_doc(doc)
         self.mx_file_loaded.emit(mx_file_path)

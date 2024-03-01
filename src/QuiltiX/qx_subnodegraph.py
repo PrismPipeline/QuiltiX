@@ -8,7 +8,7 @@ from NodeGraphQt.errors import NodeDeletionError
 from NodeGraphQt.nodes.group_node import GroupNode
 from NodeGraphQt.nodes.port_node import PortInputNode, PortOutputNode
 from NodeGraphQt.widgets.node_graph import SubGraphWidget
-from Qt import QtWidgets  # type: ignore
+from qtpy import QtWidgets  # type: ignore
 
 
 import copy
