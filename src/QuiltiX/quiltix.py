@@ -761,8 +761,14 @@ class QuiltiXWindow(QMainWindow):
 
 
 class SaveDefinitionDialog(QDialog):
-
     signal_saved_def = QtCore.Signal(object)
+
+    def __init__(self, node, mx_library_doc, parent):
+        super(SaveDefinitionDialog, self).__init__(parent)
+        self.node = node
+        self.mx_library_doc = mx_library_doc
+        self.setup_definition_dict()
+        self.setup_ui()
 
     def build_category(self, mx_def):
         category_string = 'NODE_' + mx_def.getNodeString() + '_VERSION_' + mx_def.getVersionString()
@@ -781,13 +787,6 @@ class SaveDefinitionDialog(QDialog):
             self.nodegroups.add(mx_def.getNodeGroup())
         self.nodegroups = sorted(self.nodegroups, key=lambda x: x.lower())
 
-    def __init__(self, node, mx_library_doc, parent):
-        super(SaveDefinitionDialog, self).__init__(parent)
-        self.node = node
-        self.mx_library_doc = mx_library_doc
-        self.setup_definition_dict()
-        self.setup_ui()
-
     def category_exists(self, mx_def):
         return self.build_category(mx_def) in self.categories
 
@@ -800,13 +799,15 @@ class SaveDefinitionDialog(QDialog):
         self.l_category = QLabel("Category:")
         self.e_category = QLineEdit(self.node.NODE_NAME)
         self.l_path = QLabel("Save Path:   ")
-        path = os.path.join(os.environ["USERPROFILE"], "custom_mtlx_defs", self.node.NODE_NAME+ ".mtlx")
+        path = os.path.join(os.path.expanduser("~"), "custom_mtlx_defs", self.node.NODE_NAME + ".mtlx")
         self.e_path = QLineEdit(path)
         self.b_path = QPushButton("...")
         self.bb_main = QDialogButtonBox()
         self.bb_main.addButton("Save", QDialogButtonBox.AcceptRole)
         self.bb_main.addButton("Cancel", QDialogButtonBox.RejectRole)
 
+        self.b_path.pressed.connect(self.explore_save_path_triggered)
+        
         self.bb_main.accepted.connect(self.on_accepted)
         self.bb_main.rejected.connect(self.reject)
 
@@ -825,10 +826,19 @@ class SaveDefinitionDialog(QDialog):
         self.lo_main.addWidget(self.bb_main, 4, 2, 1, 2)
         self.e_category.setFocus()
 
+    def explore_save_path_triggered(self):
+        start_path = self.e_path.text()
+        path = QFileDialog.getSaveFileName(self, "Output MaterialX Definition path", start_path, "MaterialX Definition (*.mtlx)")[0]
+
+        if not path:
+            return
+        
+        self.e_path.setText(path)
+
     def sizeHint(self):
         return QtCore.QSize(580, 175)
 
-    def on_accepted(self):        
+    def on_accepted(self):
 
         # get nodegroup from e_nodegroup QComboBox
         nodegroup = self.e_nodegroup.currentText()
