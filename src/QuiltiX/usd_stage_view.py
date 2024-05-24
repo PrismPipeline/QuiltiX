@@ -5,9 +5,9 @@ from QuiltiX.constants import ROOT
 from QuiltiX.usd_stage import set_pxr_mtlx_stdlib_search_paths
 from pxr.Usdviewq.stageView import StageView # type: ignore
 
-from Qt.QtCore import QSize  # type: ignore
-from Qt.QtCore import Qt, Signal  # type: ignore
-from Qt.QtWidgets import QVBoxLayout, QWidget  # type: ignore
+from qtpy.QtCore import QSize  # type: ignore
+from qtpy.QtCore import Qt, Signal  # type: ignore
+from qtpy.QtWidgets import QVBoxLayout, QWidget  # type: ignore
 
 set_pxr_mtlx_stdlib_search_paths()
 from QuiltiX.usd_stage import create_empty_stage, create_stage_with_hdri, get_stage_from_file # noqa: E402 
@@ -20,13 +20,13 @@ class StageViewWidget(QWidget):
     fileDropped = Signal(object)
     rendererChanged = Signal(object)
 
-    def __init__(self, data_model, stage_view, stage=None, window_title="USD Stageview"):
+    def __init__(self, stage=None, window_title="USD Stageview"):
         super(StageViewWidget, self).__init__()
 
-        self.model = data_model
+        self.model = StageView.DefaultDataModel()
         self.model.viewSettings.showHUD = False
 
-        self.view = stage_view
+        self.view = StageView(dataModel=self.model)
         self.view.orig_handleRendererChanged = self.view._handleRendererChanged
         self.view._handleRendererChanged = self._handleRendererChanged
 

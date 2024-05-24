@@ -5,8 +5,8 @@ import webbrowser
 import logging
 from importlib import metadata
 
-from Qt import QtCore, QtGui, QtWidgets  # type: ignore
-from Qt.QtWidgets import (  # type: ignore
+from qtpy import QtCore, QtGui, QtWidgets  # type: ignore
+from qtpy.QtWidgets import (  # type: ignore
     QAction,
     QActionGroup,
     QMenu,
@@ -160,29 +160,27 @@ class QuiltiXWindow(QMainWindow):
         # endregion Stage Tree
 
         if self.viewer_enabled:
-            data_model = StageView.DefaultDataModel()
-            stage_view = StageView(dataModel=data_model)
-
-            # region Render Settings
-            self.render_settings_widget = self.get_render_settings_widget(stage_view)
-            self.render_settings_dock_widget = QDockWidget()
-            self.render_settings_dock_widget.setWindowTitle("Render Settings")
-            self.render_settings_dock_widget.setWidget(self.render_settings_widget)
-            self.render_settings_dock_widget.setAllowedAreas(QtCore.Qt.AllDockWidgetAreas)
-            self.splitDockWidget(self.stage_tree_dock_widget, self.render_settings_dock_widget, QtCore.Qt.Vertical)
-            # endregion Render Settings
-
             # region Stage View
-            self.stage_view_widget = self.get_stage_view_widget(data_model, stage_view)
+            self.stage_view_widget = self.get_stage_view_widget()
             self.stage_view_widget.fileDropped.connect(self.on_view_file_dropped)
             self.stage_view_dock_widget = QDockWidget()
             self.stage_view_dock_widget.setWindowTitle("Viewport")
             self.stage_view_dock_widget.setWidget(self.stage_view_widget)
             self.stage_view_dock_widget.setAllowedAreas(QtCore.Qt.AllDockWidgetAreas)
             self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.stage_view_dock_widget)
+            # endregion Stage View
+
+            # region Render Settings
+            self.render_settings_widget = self.get_render_settings_widget(self.stage_view_widget.view)
+            self.render_settings_dock_widget = QDockWidget()
+            self.render_settings_dock_widget.setWindowTitle("Render Settings")
+            self.render_settings_dock_widget.setWidget(self.render_settings_widget)
+            self.render_settings_dock_widget.setAllowedAreas(QtCore.Qt.AllDockWidgetAreas)
+            self.render_settings_dock_widget.setHidden(True)
+            self.splitDockWidget(self.stage_tree_dock_widget, self.render_settings_dock_widget, QtCore.Qt.Vertical)
+            # endregion Render Settings
 
             self.stage_view_widget.rendererChanged.connect(self.render_settings_widget.on_renderer_changed)
-            # endregion Stage View
 
         # region Properties
         self.properties = PropertiesBinWidget(root_node_graph=self.qx_node_graph)
@@ -227,8 +225,8 @@ class QuiltiXWindow(QMainWindow):
     def get_stage_tree_widget(self):
         return usd_stage_tree.UsdStageTreeWidget()
 
-    def get_stage_view_widget(self, data_model, stage_view):
-        return usd_stage_view.StageViewWidget(data_model, stage_view)
+    def get_stage_view_widget(self):
+        return usd_stage_view.StageViewWidget()
 
     def get_render_settings_widget(self, stage_view):
         return usd_render_settings.RenderSettingsWidget(stage_view)
@@ -698,7 +696,9 @@ class QuiltiXWindow(QMainWindow):
         mx_stdlib_paths = mx_node.get_mx_stdlib_paths()
         self.qx_node_graph.load_mx_libraries(mx_stdlib_paths)
         mx_custom_lib_paths = mx_node.get_mx_custom_lib_paths()
-        self.qx_node_graph.load_mx_libraries(mx_custom_lib_paths, library_folders=[])
+        if mx_custom_lib_paths:
+            self.qx_node_graph.load_mx_libraries(mx_custom_lib_paths, library_folders=[])
+
         self.qx_node_graph.register_node(qx_node.QxGroupNode)
 
     def validate(self, doc=None, popup=True):

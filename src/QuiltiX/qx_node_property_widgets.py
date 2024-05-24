@@ -1,6 +1,6 @@
 from NodeGraphQt.custom_widgets.properties_bin import custom_widget_color_picker, custom_widget_file_paths
-from Qt.QtGui import QColor # type: ignore
-from Qt.QtWidgets import QColorDialog # type: ignore
+from qtpy.QtGui import QColor # type: ignore
+from qtpy.QtWidgets import QColorDialog # type: ignore
 
 
 class QxPropFilePath(custom_widget_file_paths.PropFilePath):

@@ -1,4 +1,4 @@
-from Qt import QtGui, QtCore  # type: ignore
+from qtpy import QtGui, QtCore  # type: ignore
 import NodeGraphQt
 
 # from NodeGraphQt.custom_widgets import properties

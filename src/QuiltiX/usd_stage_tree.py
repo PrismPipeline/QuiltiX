@@ -1,7 +1,7 @@
 import os
 import sys
 
-from Qt import QtWidgets, QtCore, QtGui  # type: ignore
+from qtpy import QtWidgets, QtCore, QtGui  # type: ignore
 
 from pxr import Usd, UsdGeom
 from QuiltiX import usd_stage

@@ -8,7 +8,7 @@ from NodeGraphQt.errors import NodeDeletionError
 from NodeGraphQt.nodes.group_node import GroupNode
 from NodeGraphQt.nodes.port_node import PortInputNode, PortOutputNode
 from NodeGraphQt.widgets.node_graph import SubGraphWidget
-from Qt import QtWidgets  # type: ignore
+from qtpy import QtWidgets  # type: ignore
 
 
 import copy
@@ -120,35 +120,43 @@ class QxSubNodeGraph(QxNodeGraph):
         """
         node_layout_direction = self._viewer.get_layout_direction()
 
-        # build the parent input port nodes.
-        input_node = qx_node_module.QxPortInputNode()
-        input_node.NODE_NAME = "Inputs"
-        input_node.model.set_property('name', "Inputs")
-        self.add_node(input_node, selected=False, push_undo=False)
-        x, y = input_node.pos()
-        if node_layout_direction is LayoutDirectionEnum.HORIZONTAL.value:
-            x -= 500
-        elif node_layout_direction is LayoutDirectionEnum.VERTICAL.value:
-            y -= 500
-        input_node.set_property('pos', [x, y], push_undo=False)
+        input_port_nodes = self.get_input_port_nodes()
+        if input_port_nodes:
+            input_node = input_port_nodes[0]
+        else:
+            # build the parent input port nodes.
+            input_node = qx_node_module.QxPortInputNode()
+            input_node.NODE_NAME = "Inputs"
+            input_node.model.set_property('name', "Inputs")
+            self.add_node(input_node, selected=False, push_undo=False)
+            x, y = input_node.pos()
+            if node_layout_direction is LayoutDirectionEnum.HORIZONTAL.value:
+                x -= 500
+            elif node_layout_direction is LayoutDirectionEnum.VERTICAL.value:
+                y -= 500
+            input_node.set_property('pos', [x, y], push_undo=False)
 
-        for port in self.node.input_ports():
-            input_node.add_output(port.name())
+            for port in self.node.input_ports():
+                input_node.add_output(port.name())
 
-        # build the parent output port nodes.
-        output_node = qx_node_module.QxPortOutputNode()
-        output_node.NODE_NAME = "Outputs"
-        output_node.model.set_property('name', "Outputs")
-        self.add_node(output_node, selected=False, push_undo=False)
-        x, y = output_node.pos()
-        if node_layout_direction is LayoutDirectionEnum.HORIZONTAL.value:
-            x += 500
-        elif node_layout_direction is LayoutDirectionEnum.VERTICAL.value:
-            y += 500
-        output_node.set_property('pos', [x, y], push_undo=False)
+        output_port_nodes = self.get_output_port_nodes()
+        if input_port_nodes:
+            output_node = output_port_nodes[0]
+        else:
+            # build the parent output port nodes.
+            output_node = qx_node_module.QxPortOutputNode()
+            output_node.NODE_NAME = "Outputs"
+            output_node.model.set_property('name', "Outputs")
+            self.add_node(output_node, selected=False, push_undo=False)
+            x, y = output_node.pos()
+            if node_layout_direction is LayoutDirectionEnum.HORIZONTAL.value:
+                x += 500
+            elif node_layout_direction is LayoutDirectionEnum.VERTICAL.value:
+                y += 500
+            output_node.set_property('pos', [x, y], push_undo=False)
 
-        for port in self.node.output_ports():
-            output_node.add_input(port.name())
+            for port in self.node.output_ports():
+                output_node.add_input(port.name())
 
         return {input_node.name(): input_node}, {output_node.name(): output_node}
 
