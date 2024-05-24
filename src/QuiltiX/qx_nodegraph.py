@@ -592,8 +592,8 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             mx_input = mx_node.getActiveInput(connection["in"][1])
             if serialized_data["nodes"][connection["out"][0]]["type_"] in ["Inputs.QxPortInputNode"]:
                 mx_input.setInterfaceName(connection["out"][1])
+                mx_input.removeAttribute("value")
                 val = parent_graph_data["nodes"][parent_id].get("custom", {}).get(connection["out"][1])
-                self.set_mx_input_value(mx_input, val)
                 continue
             
             connected_mx_node = qx_node_ids_to_mx_nodes[connection["out"][0]]
