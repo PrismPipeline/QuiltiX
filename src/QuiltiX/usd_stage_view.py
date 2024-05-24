@@ -20,13 +20,13 @@ class StageViewWidget(QWidget):
     fileDropped = Signal(object)
     rendererChanged = Signal(object)
 
-    def __init__(self, data_model, stage_view, stage=None, window_title="USD Stageview"):
+    def __init__(self, stage=None, window_title="USD Stageview"):
         super(StageViewWidget, self).__init__()
 
-        self.model = data_model
+        self.model = StageView.DefaultDataModel()
         self.model.viewSettings.showHUD = False
 
-        self.view = stage_view
+        self.view = StageView(dataModel=self.model)
         self.view.orig_handleRendererChanged = self.view._handleRendererChanged
         self.view._handleRendererChanged = self._handleRendererChanged
 
