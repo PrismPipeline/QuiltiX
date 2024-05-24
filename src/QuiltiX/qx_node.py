@@ -73,7 +73,7 @@ class QxNodeBase(BaseNode):
             node_input.color = self._random_color_from_string(str(mx_input.getType()))
 
         for node_output in self.output_ports():
-            mx_output = self.current_mx_def.getActiveInput(node_input.name())
+            mx_output = self.current_mx_def.getActiveOutput(node_output.name())
             node_output.color = self._random_color_from_string(str(mx_output.getType()))
 
 
@@ -754,11 +754,16 @@ class QxPortOutputNode(PortOutputNode):
             self.graph.node.add_output(name, color=in_port.color)
 
     def on_input_disconnected(self, in_port, out_port):
-        if not getattr(self.graph, "is_collapsing", False):
-            self.graph.node.get_output(in_port.name()).clear_connections()
-            self.graph.node.delete_output(in_port.name())
-            self.delete_input(in_port)
-            self.refresh_output_props()
+        if getattr(self.graph, "is_collapsing", False):
+            return
+        
+        if self.graph._viewer._start_port:
+            return  # is in a live connection
+
+        self.graph.node.get_output(in_port.name()).clear_connections()
+        self.graph.node.delete_output(in_port.name())
+        self.delete_input(in_port)
+        self.refresh_output_props()
 
     def refresh_output_props(self):
         todel = [prop for prop in self.model._custom_prop if prop.startswith("Output #")]

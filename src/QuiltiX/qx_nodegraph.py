@@ -217,7 +217,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             self.get_root_graph().on_port_connected(input_port, output_port)
             return
 
-        if self.auto_update_ng:
+        if self.get_root_graph().auto_update_ng:
             self.update_mx_xml_data_from_graph()
             return
         # if self.viewer()._start_port.node == input_port.node():
@@ -386,6 +386,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
         if self.auto_update_prop:
             self.mx_parameter_changed.emit(qx_node, property_name, property_value)
+            self.refresh_validation()
             if not self.is_root:
                 self.get_root_graph().mx_parameter_changed.emit(qx_node, property_name, property_value)
 
@@ -394,11 +395,11 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             self.get_root_graph().on_port_disconnected(input_port, output_port)
             return
 
-        if self.auto_update_ng:
+        if self.get_root_graph().auto_update_ng:
             self.update_mx_xml_data_from_graph()
 
     def on_mx_file_loaded(self, path):
-        if self.auto_update_ng:
+        if self.get_root_graph().auto_update_ng:
             self.update_mx_xml_data_from_graph()
 
     def _on_property_bin_changed(self, node_id, prop_name, prop_value):
@@ -446,7 +447,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         if not mx_parent:
             mx_parent = mx.createDocument()
 
-        ng_abstraction = self.widget.parent().act_ng_abstraction.isChecked()
+        ng_abstraction = self.get_root_graph().widget.parent().act_ng_abstraction.isChecked()
         if parent_graph_data:
             ng_abstraction = False
 
@@ -657,14 +658,20 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
     def get_mx_xml_data_from_graph(self):
         mx_graph_doc = self.get_current_mx_graph_doc()
-        self.widget.parent().validate(mx_graph_doc, popup=False)
+        self.get_root_graph().widget.parent().validate(mx_graph_doc, popup=False)
         xml_data = mx.writeToXmlString(mx_graph_doc)
-
         return xml_data
+    
+    def refresh_validation(self):
+        mx_graph_doc = self.get_current_mx_graph_doc()
+        self.get_root_graph().widget.parent().validate(mx_graph_doc, popup=False)
 
     def update_mx_xml_data_from_graph(self):
         if self.get_root_graph()._block_save:
             return
+        
+        if not self.is_root:
+            return self.get_root_graph().update_mx_xml_data_from_graph()
 
         xml_data = self.get_mx_xml_data_from_graph()
         if not xml_data:
@@ -673,8 +680,6 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         # print(f"updated mx xml data: {xml_data}")
         logger.debug("updated mx xml data")
         self.mx_data_updated.emit(xml_data, True)
-        if not self.is_root:
-            self.get_root_graph().update_mx_xml_data_from_graph()
 
     def validate_mtlx_doc(self, doc=None):
         doc = doc or self.get_current_mx_graph_doc()
@@ -938,7 +943,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         with self.get_root_graph().block_save():
             super(QxNodeGraph, self).delete_nodes(nodes, push_undo)
 
-        if self.has_deleted_nodes and self.auto_update_ng:
+        if self.has_deleted_nodes and self.get_root_graph().auto_update_ng:
             self.update_mx_xml_data_from_graph()
 
     def get_unique_name(self, name):
