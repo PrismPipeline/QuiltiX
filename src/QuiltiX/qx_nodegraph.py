@@ -522,6 +522,16 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
             for input_data in node_data.get("input_ports", {}):
                 val = node_data.get("custom", {}).get(input_data["name"], node_data.get("custom", {}).get(input_data["name"] + "0"))
+                hasGeomProp = bool(mx_def.getActiveInput(input_data["name"]).getDefaultGeomProp())
+                isConnected = None
+                if hasGeomProp:
+                    for connection in serialized_data.get("connections", []):
+                        if connection["in"][0] == node_id and connection["in"][1] == input_data["name"]:
+                            isConnected = True
+                            break
+                    else:
+                        isConnected = False
+
                 if node_data["type_"] == "Other.QxGroupNode":
                     for connection in node_data["subgraph_session"].get("connections", []):
                         if connection["out"][0] == input_node["id"] and connection["out"][1] == input_data["name"]:
@@ -535,7 +545,6 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                 else:
                     mx_input_type = mx_def.getActiveInput(input_data["name"]).getType()
 
-
                 # temporary fix to avoid displacement validation warning
                 if node_data["type_"] == "Material.Surfacematerial" and input_data["name"] == "displacementshader":
                     for connection in serialized_data.get("connections", []):
@@ -544,8 +553,10 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                     else:
                         continue
 
-                mx_input = mx_node.addInput(input_data["name"], mx_input_type)
-                self.set_mx_input_value(mx_input, val)
+                if not hasGeomProp or isConnected:
+                    mx_input = mx_node.addInput(input_data["name"], mx_input_type)
+                    if not hasGeomProp:
+                        self.set_mx_input_value(mx_input, val)
 
             qx_node_ids_to_mx_nodes[node_id] = mx_node
 

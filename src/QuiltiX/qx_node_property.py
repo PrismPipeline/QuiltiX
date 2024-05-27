@@ -187,6 +187,11 @@ class NodePropWidget(node_property_widgets.NodePropWidget):
                     labelText = prop_name
                 else:
                     labelText = node.get_mx_input_name_from_property_name(prop_name).replace("_", " ")
+                    mx_input = node.current_mx_def.getActiveInput(prop_name)
+                    hasGeomProp = mx_input and mx_input.getDefaultGeomProp()
+                    if hasGeomProp:
+                        widget.setDisabled(True)
+                        label.setDisabled(True)
 
                 label.setText(labelText.capitalize() + ": ")
 
