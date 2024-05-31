@@ -714,8 +714,6 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             )
 
     def load_graph_from_mx_file(self, mx_file_path):
-        base_dir = os.path.dirname(os.path.abspath(mx_file_path))
-
         doc = mx.createDocument()
         # _libraryDir = os.path.join(os.path.join(self.core.extPath, "USD", "libraries"))
         # _searchPath = _libraryDir + mx.PATH_LIST_SEPARATOR + _exampleDir
@@ -731,6 +729,17 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         mx.readFromXmlFile(doc, mx_file_path)
         self.load_graph_from_mx_doc(doc)
         self.mx_file_loaded.emit(mx_file_path)
+
+    def load_graph_from_mx_data(self, mx_data):
+        doc = mx.createDocument()
+        try:
+            mx.readFromXmlString(doc, mx_data)
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(self.get_root_graph().widget.parent(), "Warning", 'Failed to load XML data:\n\n%s' % e)
+            return
+
+        self.load_graph_from_mx_doc(doc)
+        self.mx_file_loaded.emit("")
 
     def load_graph_from_mx_doc(self, doc):
         with self.get_root_graph().block_save():
