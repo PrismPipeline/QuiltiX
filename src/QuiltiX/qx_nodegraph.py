@@ -6,7 +6,7 @@ from contextlib import contextmanager
 
 import NodeGraphQt
 from NodeGraphQt.nodes.group_node import GroupNode
-from Qt import QtCore, QtGui, QtWidgets  # type: ignore
+from qtpy import QtCore, QtGui, QtWidgets  # type: ignore
 from QuiltiX.qx_nodegraph_viewer import QxNodeGraphViewer  
 
 import QuiltiX.qx_node as qx_node_module
@@ -114,10 +114,10 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         else:
             mx_defs = self.mx_library_doc.getNodeDefs()
 
+        new_defs = []
         if mx_defs:
-            self.register_nodes(
-                qx_node_module.qx_node_from_mx_node_group_dict_generator(mx_defs)
-            )
+            new_defs = qx_node_module.qx_node_from_mx_node_group_dict_generator(mx_defs)
+            self.register_nodes(new_defs)
 
             node_menu = self.context_nodes_menu()
             for mx_def in mx_defs:
@@ -132,6 +132,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                         )
 
         self.mx_defs = self.mx_library_doc.getNodeDefs()
+        return new_defs
 
     def has_nodegraph_implementation(self, mx_def):
         imp = mx_def.getImplementation()
@@ -216,7 +217,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             self.get_root_graph().on_port_connected(input_port, output_port)
             return
 
-        if self.auto_update_ng:
+        if self.get_root_graph().auto_update_ng:
             self.update_mx_xml_data_from_graph()
             return
         # if self.viewer()._start_port.node == input_port.node():
@@ -385,6 +386,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
         if self.auto_update_prop:
             self.mx_parameter_changed.emit(qx_node, property_name, property_value)
+            self.refresh_validation()
             if not self.is_root:
                 self.get_root_graph().mx_parameter_changed.emit(qx_node, property_name, property_value)
 
@@ -393,11 +395,11 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             self.get_root_graph().on_port_disconnected(input_port, output_port)
             return
 
-        if self.auto_update_ng:
+        if self.get_root_graph().auto_update_ng:
             self.update_mx_xml_data_from_graph()
 
     def on_mx_file_loaded(self, path):
-        if self.auto_update_ng:
+        if self.get_root_graph().auto_update_ng:
             self.update_mx_xml_data_from_graph()
 
     def _on_property_bin_changed(self, node_id, prop_name, prop_value):
@@ -445,7 +447,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         if not mx_parent:
             mx_parent = mx.createDocument()
 
-        ng_abstraction = self.widget.parent().act_ng_abstraction.isChecked()
+        ng_abstraction = self.get_root_graph().widget.parent().act_ng_abstraction.isChecked()
         if parent_graph_data:
             ng_abstraction = False
 
@@ -523,6 +525,16 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
             for input_data in node_data.get("input_ports", {}):
                 val = node_data.get("custom", {}).get(input_data["name"], node_data.get("custom", {}).get(input_data["name"] + "0"))
+                hasGeomProp = bool(mx_def.getActiveInput(input_data["name"]).getDefaultGeomProp())
+                isConnected = None
+                if hasGeomProp:
+                    for connection in serialized_data.get("connections", []):
+                        if connection["in"][0] == node_id and connection["in"][1] == input_data["name"]:
+                            isConnected = True
+                            break
+                    else:
+                        isConnected = False
+
                 if node_data["type_"] == "Other.QxGroupNode":
                     for connection in node_data["subgraph_session"].get("connections", []):
                         if connection["out"][0] == input_node["id"] and connection["out"][1] == input_data["name"]:
@@ -544,8 +556,10 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                     else:
                         continue
 
-                mx_input = mx_node.addInput(input_data["name"], mx_input_type)
-                self.set_mx_input_value(mx_input, val)
+                if not hasGeomProp or isConnected:
+                    mx_input = mx_node.addInput(input_data["name"], mx_input_type)
+                    if not hasGeomProp:
+                        self.set_mx_input_value(mx_input, val)
 
             for output_data in node_data.get("output_ports", {}):
                 if node_data["type_"] == "Other.QxGroupNode":
@@ -604,8 +618,8 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             mx_input = mx_node.getActiveInput(connection["in"][1])
             if serialized_data["nodes"][connection["out"][0]]["type_"] in ["Inputs.QxPortInputNode"]:
                 mx_input.setInterfaceName(connection["out"][1])
+                mx_input.removeAttribute("value")
                 val = parent_graph_data["nodes"][parent_id].get("custom", {}).get(connection["out"][1])
-                self.set_mx_input_value(mx_input, val)
                 continue
             
             connected_mx_node = qx_node_ids_to_mx_nodes[connection["out"][0]]
@@ -647,7 +661,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                 mx_input.setValueString(val)
                 mx_input.setAttribute("colorspace", "srgb_texture")
             else:
-                mx_input.setValue(val)
+                mx_input.setValue(val, mx_input_type)
 
     def get_current_graph_data(self):
         serialized_data = self.serialize_session()
@@ -672,14 +686,20 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
     def get_mx_xml_data_from_graph(self):
         mx_graph_doc = self.get_current_mx_graph_doc()
-        self.widget.parent().validate(mx_graph_doc, popup=False)
+        self.get_root_graph().widget.parent().validate(mx_graph_doc, popup=False)
         xml_data = mx.writeToXmlString(mx_graph_doc)
-
         return xml_data
+    
+    def refresh_validation(self):
+        mx_graph_doc = self.get_current_mx_graph_doc()
+        self.get_root_graph().widget.parent().validate(mx_graph_doc, popup=False)
 
     def update_mx_xml_data_from_graph(self):
         if self.get_root_graph()._block_save:
             return
+        
+        if not self.is_root:
+            return self.get_root_graph().update_mx_xml_data_from_graph()
 
         xml_data = self.get_mx_xml_data_from_graph()
         if not xml_data:
@@ -688,8 +708,6 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         # print(f"updated mx xml data: {xml_data}")
         logger.debug("updated mx xml data")
         self.mx_data_updated.emit(xml_data, True)
-        if not self.is_root:
-            self.get_root_graph().update_mx_xml_data_from_graph()
 
     def validate_mtlx_doc(self, doc=None):
         doc = doc or self.get_current_mx_graph_doc()
@@ -713,20 +731,30 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             )
 
     def load_graph_from_mx_file(self, mx_file_path):
+        base_dir = os.path.dirname(os.path.abspath(mx_file_path))
+
+        doc = mx.createDocument()
+        # _libraryDir = os.path.join(os.path.join(self.core.extPath, "USD", "libraries"))
+        # _searchPath = _libraryDir + mx.PATH_LIST_SEPARATOR + _exampleDir
+        # _searchPath = _libraryDir
+
+        # mx.readFromXmlFile(doc, path, _searchPath)
+        new_defs = self.load_mx_libraries([os.path.dirname(mx_file_path)])
+        if new_defs:
+            dirpath = os.path.dirname(mx_file_path)
+            if dirpath not in os.getenv("PXR_MTLX_PLUGIN_SEARCH_PATHS", "").split(os.pathsep):
+                os.environ["PXR_MTLX_PLUGIN_SEARCH_PATHS"] = os.getenv("PXR_MTLX_PLUGIN_SEARCH_PATHS", "") + os.pathsep + dirpath
+
+        mx.readFromXmlFile(doc, mx_file_path)
+        self.load_graph_from_mx_doc(doc)
+        self.mx_file_loaded.emit(mx_file_path)
+
+    def load_graph_from_mx_doc(self, doc):
         with self.get_root_graph().block_save():
             self.clear_session()
 
-            base_dir = os.path.dirname(os.path.abspath(mx_file_path))
-
-            doc = mx.createDocument()
-            # _libraryDir = os.path.join(os.path.join(self.core.extPath, "USD", "libraries"))
-            # _searchPath = _libraryDir + mx.PATH_LIST_SEPARATOR + _exampleDir
-            # _searchPath = _libraryDir
-
             had_pos = False
             qx_node_to_mx_node = {}
-            # mx.readFromXmlFile(doc, path, _searchPath)
-            mx.readFromXmlFile(doc, mx_file_path)
 
             # Create Nodes
             for cur_mx_node in doc.getNodes():
@@ -755,8 +783,6 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
                 if not graph.is_root:
                     graph.parent_graph.collapse_group_node(graph.node)
-
-        self.mx_file_loaded.emit(mx_file_path)
 
     def load_image_file(self, filepath, xoffset=0, yoffset=0):
         local_pos = self.viewer().mapFromGlobal(QtGui.QCursor.pos())
@@ -945,7 +971,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         with self.get_root_graph().block_save():
             super(QxNodeGraph, self).delete_nodes(nodes, push_undo)
 
-        if self.has_deleted_nodes and self.auto_update_ng:
+        if self.has_deleted_nodes and self.get_root_graph().auto_update_ng:
             self.update_mx_xml_data_from_graph()
 
     def get_unique_name(self, name):

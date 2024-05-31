@@ -131,8 +131,11 @@ QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background-co
 QMenuBar {
     background-color: #111111;
     color: #ffffff;
-    padding: 4px;
     border: none;
+}
+
+QMenuBar::item {
+    color: #ffffff;
 }
 
 QMenuBar::item:selected, QMenuBar::item:pressed {
@@ -189,16 +192,18 @@ QComboBox QAbstractItemView {
 	border-bottom-left-radius: 3px;
 	border-bottom-right-radius: 3px;
 	outline: none;
+    padding: 0px;
 }
 
 QComboBox QAbstractItemView::item {
 	border: none;
-	padding: 5px;
+	padding: 0px;
+    background-color: transparent;
 }
 
 QComboBox QAbstractItemView::item:hover, QComboBox QAbstractItemView::item:selected {
 	background-color: #333333;
-	padding: 5px;
+	padding: 0px;
 }
 
 /* textbox - line edit etc. */

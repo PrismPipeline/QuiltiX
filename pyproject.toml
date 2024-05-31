@@ -1,10 +1,10 @@
 [project]
 name = "QuiltiX"
-version = "0.5.0"
+version = "0.6.1"
 description = "MaterialX Graphical Node Editor"
 readme = "README.md"
 license = {file = "LICENSE"}
-requires-python = "~=3.9"
+requires-python = "~=3.11"
 keywords = ["openusd", "materialx"]
 
 authors = [
@@ -22,15 +22,14 @@ classifiers = [
 ]
 
 dependencies = [
-    "materialx",
-    "Qt.py",
-    "PySide2>=5.12",
+    "materialx==1.38.9",
+    "QtPy",
+    "PySide6~=6.6",
     "PyOpenGL",
     "PyOpenGL_accelerate",
-    # "OpenUSD_build @ git+https://github.com/PrismPipeline/OpenUSD_build.git@23.11-win-mtlx-1.38.8"
+    # "OpenUSD_build @ git+https://github.com/PrismPipeline/OpenUSD_build.git@24.03-win-mtlx-1.38.9"
     # TODO
-    "NodeGraphQt-QuiltiX-fork",
-    # "NodeGraphQt @ git+https://github.com/manuelkoester/NodeGraphQt.git@develop",
+    "NodeGraphQt-QuiltiX-fork~=0.7",
 ]
 
 [tool.setuptools.packages.find]
@@ -44,7 +43,6 @@ dev = [
     "pytest-qt",
     "pytest-cov",
     # TODO
-    # "Qt.py-stubs @ git+https://github.com/matiascodesal/Qt.py-stubs.git@5a07e53",
     # "MaterialX-stubs @ git+https://github.com/manuelkoester/MaterialX-stubs.git@7696cbb"
 ]
 

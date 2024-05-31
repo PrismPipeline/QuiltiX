@@ -1,4 +1,4 @@
-from Qt import QtWidgets, QtCore  # type: ignore
+from qtpy import QtWidgets, QtCore  # type: ignore
 from QuiltiX.constants import VALUE_DECIMALS
 
 from pxr.Usdviewq.stageView import UsdImagingGL  # type: ignore

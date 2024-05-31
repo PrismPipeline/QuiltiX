@@ -5,8 +5,8 @@ import webbrowser
 import logging
 from importlib import metadata
 
-from Qt import QtCore, QtGui, QtWidgets  # type: ignore
-from Qt.QtWidgets import (  # type: ignore
+from qtpy import QtCore, QtGui, QtWidgets  # type: ignore
+from qtpy.QtWidgets import (  # type: ignore
     QAction,
     QActionGroup,
     QMenu,
@@ -23,6 +23,7 @@ from Qt.QtWidgets import (  # type: ignore
     QDialogButtonBox,
     QGridLayout,
     QSizePolicy,
+    QComboBox,
 )
 
 from pxr import UsdShade, Usd
@@ -159,29 +160,27 @@ class QuiltiXWindow(QMainWindow):
         # endregion Stage Tree
 
         if self.viewer_enabled:
-            data_model = StageView.DefaultDataModel()
-            stage_view = StageView(dataModel=data_model)
-
-            # region Render Settings
-            self.render_settings_widget = self.get_render_settings_widget(stage_view)
-            self.render_settings_dock_widget = QDockWidget()
-            self.render_settings_dock_widget.setWindowTitle("Render Settings")
-            self.render_settings_dock_widget.setWidget(self.render_settings_widget)
-            self.render_settings_dock_widget.setAllowedAreas(QtCore.Qt.AllDockWidgetAreas)
-            self.splitDockWidget(self.stage_tree_dock_widget, self.render_settings_dock_widget, QtCore.Qt.Vertical)
-            # endregion Render Settings
-
             # region Stage View
-            self.stage_view_widget = self.get_stage_view_widget(data_model, stage_view)
+            self.stage_view_widget = self.get_stage_view_widget()
             self.stage_view_widget.fileDropped.connect(self.on_view_file_dropped)
             self.stage_view_dock_widget = QDockWidget()
             self.stage_view_dock_widget.setWindowTitle("Viewport")
             self.stage_view_dock_widget.setWidget(self.stage_view_widget)
             self.stage_view_dock_widget.setAllowedAreas(QtCore.Qt.AllDockWidgetAreas)
             self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.stage_view_dock_widget)
+            # endregion Stage View
+
+            # region Render Settings
+            self.render_settings_widget = self.get_render_settings_widget(self.stage_view_widget.view)
+            self.render_settings_dock_widget = QDockWidget()
+            self.render_settings_dock_widget.setWindowTitle("Render Settings")
+            self.render_settings_dock_widget.setWidget(self.render_settings_widget)
+            self.render_settings_dock_widget.setAllowedAreas(QtCore.Qt.AllDockWidgetAreas)
+            self.render_settings_dock_widget.setHidden(True)
+            self.splitDockWidget(self.stage_tree_dock_widget, self.render_settings_dock_widget, QtCore.Qt.Vertical)
+            # endregion Render Settings
 
             self.stage_view_widget.rendererChanged.connect(self.render_settings_widget.on_renderer_changed)
-            # endregion Stage View
 
         # region Properties
         self.properties = PropertiesBinWidget(root_node_graph=self.qx_node_graph)
@@ -226,8 +225,8 @@ class QuiltiXWindow(QMainWindow):
     def get_stage_tree_widget(self):
         return usd_stage_tree.UsdStageTreeWidget()
 
-    def get_stage_view_widget(self, data_model, stage_view):
-        return usd_stage_view.StageViewWidget(data_model, stage_view)
+    def get_stage_view_widget(self):
+        return usd_stage_view.StageViewWidget()
 
     def get_render_settings_widget(self, stage_view):
         return usd_render_settings.RenderSettingsWidget(stage_view)
@@ -275,7 +274,7 @@ class QuiltiXWindow(QMainWindow):
     def save_as_definition(self):
         action = self.save_def_cmd.qaction
         node = self.qx_node_graph.get_node_by_id(action.node_id)
-        dlg_save = SaveDefinitionDialog(node, self)
+        dlg_save = SaveDefinitionDialog(node, self.qx_node_graph.mx_library_doc, self)
         dlg_save.signal_saved_def.connect(self.on_defitintion_saved)
         dlg_save.show()
 
@@ -318,6 +317,10 @@ class QuiltiXWindow(QMainWindow):
         show_mx_text = QAction("Show MaterialX as text...", self)
         show_mx_text.triggered.connect(self.show_mx_text_triggered)
         self.file_menu.addAction(show_mx_text)
+
+        show_usd_text = QAction("Show USD as text...", self)
+        show_usd_text.triggered.connect(self.show_usd_text_triggered)
+        self.file_menu.addAction(show_usd_text)
 
         self.file_menu.addSeparator()
 
@@ -537,6 +540,27 @@ class QuiltiXWindow(QMainWindow):
         te_text.resize(1000, 800)
         te_text.show()
 
+    def print_usd_prim(self, prim):
+        assert isinstance(prim, Usd.Prim)
+        prim_stage = prim.GetStage()
+        prim_stage_id = prim_stage.GetRootLayer().identifier
+        stage = Usd.Stage.CreateInMemory()
+        target = stage.DefinePrim("/{}".format(prim.GetName()))
+        target.GetReferences().AddReference(prim_stage_id, prim.GetPath())        
+        return stage.ExportToString() 
+
+    def show_usd_text_triggered(self):
+        usdstage = self.stage_ctrl.stage
+        materials = usdstage.GetPrimAtPath("/MaterialX")
+        text = self.print_usd_prim(materials)
+        te_text = QTextEdit()
+        te_text.setText(text)
+        te_text.setReadOnly(True)
+        te_text.setParent(self, QtCore.Qt.Window)
+        te_text.setWindowTitle("USD text preview")
+        te_text.resize(1000, 800)
+        te_text.show()
+
     def show_mx_view_triggered(self):
         exe = os.getenv("MATERIALX_VIEW", "")
         if not os.path.exists(exe):
@@ -672,7 +696,9 @@ class QuiltiXWindow(QMainWindow):
         mx_stdlib_paths = mx_node.get_mx_stdlib_paths()
         self.qx_node_graph.load_mx_libraries(mx_stdlib_paths)
         mx_custom_lib_paths = mx_node.get_mx_custom_lib_paths()
-        self.qx_node_graph.load_mx_libraries(mx_custom_lib_paths, library_folders=[])
+        if mx_custom_lib_paths:
+            self.qx_node_graph.load_mx_libraries(mx_custom_lib_paths, library_folders=[])
+
         self.qx_node_graph.register_node(qx_node.QxGroupNode)
 
     def validate(self, doc=None, popup=True):
@@ -735,58 +761,93 @@ class QuiltiXWindow(QMainWindow):
 
 
 class SaveDefinitionDialog(QDialog):
-
     signal_saved_def = QtCore.Signal(object)
 
-    def __init__(self, node, parent):
+    def __init__(self, node, mx_library_doc, parent):
         super(SaveDefinitionDialog, self).__init__(parent)
         self.node = node
+        self.mx_library_doc = mx_library_doc
+        self.setup_definition_dict()
         self.setup_ui()
+
+    def build_category(self, mx_def):
+        category_string = 'NODE_' + mx_def.getNodeString() + '_VERSION_' + mx_def.getVersionString()
+        for input in mx_def.getActiveInputs():
+            category_string += 'IN_' + input.getName() + '_' + input.getType()
+        for output in mx_def.getActiveOutputs():
+            category_string += 'OUT_' + output.getName() + '_' + output.getType()
+        return category_string
+    
+    def setup_definition_dict(self):
+        self.categories = set()
+        self.nodegroups = set()
+        mx_defs = self.mx_library_doc.getNodeDefs()
+        for mx_def in mx_defs:
+            self.categories.add(self.build_category(mx_def))
+            self.nodegroups.add(mx_def.getNodeGroup())
+        self.nodegroups = sorted(self.nodegroups, key=lambda x: x.lower())
+
+    def category_exists(self, mx_def):
+        return self.build_category(mx_def) in self.categories
 
     def setup_ui(self):
         self.setWindowTitle("Save Node Definition")
 
+        self.l_nodegroup = QLabel("Node Group:")
+        self.e_nodegroup = QComboBox()
+        self.e_nodegroup.addItems(self.nodegroups)
         self.l_category = QLabel("Category:")
-        self.e_category = QLineEdit("Custom")
-        self.l_name = QLabel("Name:")
-        self.e_name = QLineEdit(self.node.NODE_NAME)
+        self.e_category = QLineEdit(self.node.NODE_NAME)
         self.l_path = QLabel("Save Path:   ")
-        path = os.path.join(os.environ["USERPROFILE"], "custom_mtlx_defs", self.node.NODE_NAME + ".mtlx")
+        path = os.path.join(os.path.expanduser("~"), "custom_mtlx_defs", self.node.NODE_NAME + ".mtlx")
         self.e_path = QLineEdit(path)
         self.b_path = QPushButton("...")
         self.bb_main = QDialogButtonBox()
         self.bb_main.addButton("Save", QDialogButtonBox.AcceptRole)
         self.bb_main.addButton("Cancel", QDialogButtonBox.RejectRole)
 
+        self.b_path.pressed.connect(self.explore_save_path_triggered)
+        
         self.bb_main.accepted.connect(self.on_accepted)
         self.bb_main.rejected.connect(self.reject)
 
-        self.e_category.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self.e_nodegroup.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
         self.lo_main = QGridLayout(self)
-        self.lo_main.addWidget(self.l_category, 0, 0)
-        self.lo_main.addWidget(self.e_category, 0, 1, 1, 3)
-        self.lo_main.addWidget(self.l_name, 1, 0)
-        self.lo_main.addWidget(self.e_name, 1, 1, 1, 3)
+        self.lo_main.addWidget(self.l_nodegroup, 0, 0)
+        self.lo_main.addWidget(self.e_nodegroup, 0, 1, 1, 3)
+        self.lo_main.addWidget(self.l_category, 1, 0)
+        self.lo_main.addWidget(self.e_category, 1, 1, 1, 3)
         self.lo_main.addWidget(self.l_path, 2, 0)
         self.lo_main.addWidget(self.e_path, 2, 1, 1, 2)
         self.lo_main.addWidget(self.b_path, 2, 3)
         self.lo_main.setRowStretch(3, 100)
         self.lo_main.setColumnStretch(1, 100)
         self.lo_main.addWidget(self.bb_main, 4, 2, 1, 2)
-        self.e_name.setFocus()
+        self.e_category.setFocus()
+
+    def explore_save_path_triggered(self):
+        start_path = self.e_path.text()
+        path = QFileDialog.getSaveFileName(self, "Output MaterialX Definition path", start_path, "MaterialX Definition (*.mtlx)")[0]
+
+        if not path:
+            return
+        
+        self.e_path.setText(path)
 
     def sizeHint(self):
         return QtCore.QSize(580, 175)
 
     def on_accepted(self):
-        nodegroup = self.e_category.text()
+
+        # get nodegroup from e_nodegroup QComboBox
+        nodegroup = self.e_nodegroup.currentText()
         if not nodegroup:
             QMessageBox.warning(self, "Warning", "Invalid category.")
             return
 
-        nodename = self.e_name.text()
-        if not nodegroup:
+        nodename = self.e_category.text()
+        if not nodename:
             QMessageBox.warning(self, "Warning", "Invalid name.")
             return
 
@@ -795,7 +856,6 @@ class SaveDefinitionDialog(QDialog):
             QMessageBox.warning(self, "Warning", "Invalid Save Path.")
             return
 
-        node_name = self.node.NODE_NAME
         doc = mx.createDocument()
 
         graph_doc = mx.createDocument()
@@ -808,7 +868,7 @@ class SaveDefinitionDialog(QDialog):
         version = "1.0.0"
         defaultversion = False
         nodedefName = 'ND_' + nodename
-        nodegraphName = 'NG_' + nodename  # not working?
+        nodegraphName = 'NG_' + nodename
         ng.setName(nodegraphName)
 
         definition = doc.addNodeDefFromGraph(
@@ -820,19 +880,47 @@ class SaveDefinitionDialog(QDialog):
             nodegroup,
             nodegraphName
         )
+
+        if self.category_exists(definition):
+            # Warn but allow to continue
+            msgBox = QMessageBox()
+            msgBox.setIcon(QMessageBox.Warning)
+            msgBox.setText("This category already exists!")
+            msgBox.setWindowTitle("Warning")
+            msgBox.addButton('Proceed', QMessageBox.AcceptRole)
+            cancelButton = msgBox.addButton('Abort', QMessageBox.RejectRole)
+            msgBox.exec()
+            if msgBox.clickedButton() == cancelButton:
+                return
+
         ng = doc.getNodeGraph(nodegraphName)
 
+        ng_input_names = []
         for ng_input in ng.getInputs():
-            ndef_input = definition.addInput(ng_input.getName(), ng_input.getType())
+            ng_input_name = ng_input.getName()
+            ng_input_names.append(ng_input_name)
+            ndef_input = definition.addInput(ng_input_name, ng_input.getType())
             if ndef_input:
                 ndef_input.copyContentFrom(ng_input)
                 ndef_input.setSourceUri('')
+        for ng_input_name in ng_input_names:
+            ng.removeInput(ng_input_name)
 
         defDoc = mx.createDocument()
         newDef = defDoc.addNodeDef(definition.getName(), '', definition.getCategory())
         newDef.copyContentFrom(definition)
         newGraph = defDoc.addNodeGraph(ng.getName())
         newGraph.copyContentFrom(ng)
+
+        treeIter = defDoc.traverseTree()
+        for elem in treeIter:
+            elem.removeAttribute('xpos')
+            elem.removeAttribute('ypos')                 
+
+        result = defDoc.validate()
+        if (result[0] == False):
+            QMessageBox.warning(self, "Warning", "Definition created is invalid.")
+            return
 
         outdir = os.path.dirname(outpath)
         if not os.path.exists(outdir):

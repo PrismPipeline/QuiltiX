@@ -2,7 +2,7 @@ import os
 import pathlib
 import logging
 
-from Qt import QtCore # type: ignore
+from qtpy import QtCore # type: ignore
 
 from pxr import Usd, UsdLux, Sdf, Tf, UsdGeom,  UsdShade, Gf  # noqa: E402 # type: ignore
 from pxr.Usdviewq._usdviewq import Utils # type: ignore
@@ -164,7 +164,7 @@ class MxStageController(QtCore.QObject):
             mx_stage_path = f"/MaterialX/NodeGraphs/{ng_name}/" + cports[0].node().name()
             property_name = cports[0].name()
             prim = self.stage.GetPrimAtPath(mx_stage_path)
-        elif qx_node.current_mx_def.getNodeGroup() in ["material", "pbr"]:
+        elif qx_node.current_mx_def.getNodeGroup() in ["material", "pbr", "shader"]:
             mat_prim = self.stage.GetPrimAtPath("/MaterialX/Materials")
             prim = mat_prim.GetChildren()[0]
             mx_stage_path = prim.GetPath().pathString
@@ -195,6 +195,8 @@ class MxStageController(QtCore.QObject):
 
             if len(property_value) == 3:
                 property_value = Gf.Vec3f(property_value)
+            elif len(property_value) == 2:
+                property_value = Gf.Vec2f(property_value)                
 
         usdinput.GetAttr().Set(property_value)
         self.signal_stage_updated.emit()

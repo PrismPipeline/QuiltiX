@@ -35,7 +35,7 @@ QuiltiX is a graphical node editor to edit, and author [MaterialX](https://mater
 - [License](#license)
 
 ## Requirements
-QuiltiX requires Python 3.9+ as well as compiled versions of USD and MaterialX.
+QuiltiX requires Python 3.11+ as well as compiled versions of USD and MaterialX.
 
 ## Installation
 ### From PyPi
@@ -48,7 +48,7 @@ If you additionally require pre-built binaries for MaterialX & USD we currently 
 On Linux/Mac you need to provide your own binaries for now. Here are linked instructions for [MaterialX](https://github.com/AcademySoftwareFoundation/MaterialX/tree/main#quick-start-for-developers) & [OpenUSD](https://github.com/PixarAnimationStudios/OpenUSD/blob/release/BUILDING.md)
 ```shell
 pip install QuiltiX
-pip install git+https://github.com/PrismPipeline/OpenUSD_build.git@23.11-win-mtlx-1.38.8
+pip install git+https://github.com/PrismPipeline/OpenUSD_build.git@24.03-win-mtlx-1.38.9
 ```
 
 ### From Zip

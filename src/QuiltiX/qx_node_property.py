@@ -8,9 +8,9 @@ from NodeGraphQt.custom_widgets.properties_bin import (
 )
 from NodeGraphQt.custom_widgets.properties_bin.node_property_factory import NodePropertyWidgetFactory
 from NodeGraphQt.custom_widgets.properties_bin.prop_widgets_base import PropLineEdit
-from Qt.QtCore import QSize, Qt, Signal, QEvent  # type: ignore
-from Qt.QtGui import QMouseEvent  # type: ignore
-from Qt.QtWidgets import (  # type: ignore
+from qtpy.QtCore import QSize, Qt, Signal, QEvent  # type: ignore
+from qtpy.QtGui import QMouseEvent  # type: ignore
+from qtpy.QtWidgets import (  # type: ignore
     QHBoxLayout,
     QLabel,
     QTableWidgetItem,
@@ -187,6 +187,11 @@ class NodePropWidget(node_property_widgets.NodePropWidget):
                     labelText = prop_name
                 else:
                     labelText = node.get_mx_input_name_from_property_name(prop_name).replace("_", " ")
+                    mx_input = node.current_mx_def.getActiveInput(prop_name)
+                    hasGeomProp = mx_input and mx_input.getDefaultGeomProp()
+                    if hasGeomProp:
+                        widget.setDisabled(True)
+                        label.setDisabled(True)
 
                 label.setText(labelText.capitalize() + ": ")
 
