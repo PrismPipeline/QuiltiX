@@ -127,4 +127,7 @@ def get_mx_node_def_type(mx_node_def):
         else "ND_"
     )
     mx_node_def_type = mx_node_def_full_name.replace(all_but_type_string, "")
+    if "_" in mx_node_def_type:
+        mx_node_def_type = mx_node_def_type.split("_")[0]
+
     return mx_node_def_type
