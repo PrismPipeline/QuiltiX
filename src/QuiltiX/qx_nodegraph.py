@@ -522,7 +522,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
             for input_data in node_data.get("input_ports", {}):
                 val = node_data.get("custom", {}).get(input_data["name"], node_data.get("custom", {}).get(input_data["name"] + "0"))
-                hasGeomProp = mx_def and bool(mx_def.getActiveInput(input_data["name"]).getDefaultGeomProp())
+                hasGeomProp = mx_def and bool(mx_def.getActiveInput(input_data["name"]).getDefaultGeomProp())  # the inputnodes and outputnodes of nodegraphs don't have a mx definition
                 isConnected = None
                 if hasGeomProp:
                     for connection in serialized_data.get("connections", []):
