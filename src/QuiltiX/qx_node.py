@@ -624,7 +624,6 @@ class QxPortInputNode(PortInputNode):
             in_port.color = QxNodeBase._random_color_from_string(out_port.view.get_mx_port_type())
             in_port.model.name = name
             in_port.view.name = name
-            in_port.view.multi_connection = False  # refresh tooltip
             text_item = self.view.get_output_text_item(in_port.view)
             text_item.setPlainText(name)
             out_port.model.connected_ports[self.id] = [name]
