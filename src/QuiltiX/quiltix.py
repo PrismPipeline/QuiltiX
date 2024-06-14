@@ -22,6 +22,7 @@ from qtpy.QtWidgets import (  # type: ignore
     QPushButton,
     QDialogButtonBox,
     QGridLayout,
+    QVBoxLayout,
     QSizePolicy,
     QComboBox,
 )
@@ -294,8 +295,12 @@ class QuiltiXWindow(QMainWindow):
         # endregion Tabs
 
         # region File
-        load_mx_file = QAction("Load MaterialX...", self)
+        load_mx_file = QAction("Load MaterialX file...", self)
         load_mx_file.triggered.connect(self.load_mx_file_triggered)
+        self.file_menu.addAction(load_mx_file)
+
+        load_mx_file = QAction("Load MaterialX data...", self)
+        load_mx_file.triggered.connect(self.load_mx_data_triggered)
         self.file_menu.addAction(load_mx_file)
 
         save_mx_file = QAction("Save MaterialX...", self)
@@ -506,6 +511,27 @@ class QuiltiXWindow(QMainWindow):
 
         self.mx_selection_path = path
         self.qx_node_graph.load_graph_from_mx_file(path)
+
+    def load_mx_data_triggered(self):
+        dlg = QDialog()
+        dlg.setParent(self, QtCore.Qt.Window)
+        dlg.setWindowTitle("MaterialX XML Data")
+        dlg.lo_main = QVBoxLayout(dlg)
+        dlg.te_text = QTextEdit()
+        dlg.bb_main = QDialogButtonBox()
+        dlg.bb_main.addButton("Load", QDialogButtonBox.AcceptRole)
+        dlg.bb_main.addButton("Cancel", QDialogButtonBox.RejectRole)
+        dlg.lo_main.addWidget(dlg.te_text)
+        dlg.lo_main.addWidget(dlg.bb_main)
+        dlg.bb_main.accepted.connect(dlg.accept)
+        dlg.bb_main.rejected.connect(dlg.reject)
+        dlg.resize(1000, 600)
+        result = dlg.exec_()
+        if result == 0:
+            return
+
+        xml_str = dlg.te_text.toPlainText()
+        self.qx_node_graph.load_graph_from_mx_data(xml_str)
 
     def save_mx_file_triggered(self):
         start_path = self.mx_selection_path
