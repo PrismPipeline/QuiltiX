@@ -943,6 +943,11 @@ class QxGroupNodeItem(QxNodeItem):
             for node in self.viewer().graph.all_nodes():
                 if node.id == self.id:
                     return node
+                
+        name_rect = self.text_item.mapRectToItem(self, self.text_item.boundingRect())
+        if name_rect.contains(event.pos()):
+            super(QxGroupNodeItem, self).mouseDoubleClickEvent(event)
+            return
 
         node = get_node_of_node_item()
         if event.button() == QtCore.Qt.LeftButton:
