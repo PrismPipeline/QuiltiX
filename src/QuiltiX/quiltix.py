@@ -218,6 +218,7 @@ class QuiltiXWindow(QMainWindow):
         if self.act_apply_mat.isChecked():
             self.stage_ctrl.apply_first_material_to_all_prims()
         self.stage_tree_widget.refresh_tree()
+        self.hide_node_defs()
 
     def on_node_graph_changed(self, nodegraph):
         if self.act_apply_mat.isChecked():
@@ -365,6 +366,12 @@ class QuiltiXWindow(QMainWindow):
         self.act_ng_abstraction.setCheckable(True)
         self.act_ng_abstraction.setChecked(True)
         self.options_menu.addAction(self.act_ng_abstraction)
+
+        self.act_hide_defs = QAction("Hide nodegraph definitions", self)
+        self.act_hide_defs.setCheckable(True)
+        self.act_hide_defs.setChecked(True)
+        self.act_hide_defs.toggled.connect(self.hide_node_defs)
+        self.options_menu.addAction(self.act_hide_defs)
 
         self.act_validate = QAction("Validate MaterialX document...", self)
         self.act_validate.triggered.connect(self.validate)
@@ -726,6 +733,14 @@ class QuiltiXWindow(QMainWindow):
             self.qx_node_graph.load_mx_libraries(mx_custom_lib_paths, library_folders=[])
 
         self.qx_node_graph.register_node(qx_node.QxGroupNode)
+
+    def hide_node_defs(self, hide=None):
+        if hide is None:
+            hide = self.act_hide_defs.isChecked()
+
+        for node in self.qx_node_graph.all_nodes():
+            if node.get_property("nodedef"):
+                node.view.setVisible(not hide)
 
     def validate(self, doc=None, popup=True):
         result = self.qx_node_graph.validate_mtlx_doc(doc)
