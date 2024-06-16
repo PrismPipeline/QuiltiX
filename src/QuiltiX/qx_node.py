@@ -1,7 +1,7 @@
 import random
 import logging
 
-from qtpy import QtCore  # type: ignore
+from qtpy import QtCore, QtGui  # type: ignore
 
 import MaterialX as mx  # type: ignore
 from NodeGraphQt import BaseNode, GroupNode
@@ -871,6 +871,15 @@ class QxNodeItem(NodeItem):
 
         del port
         del text
+
+    def mouseDoubleClickEvent(self, event):
+        super(QxNodeItem, self).mouseDoubleClickEvent(event)
+        if self.text_item.textInteractionFlags() & QtCore.Qt.TextSelectableByMouse:
+            cursor = self.text_item.textCursor()
+            cursor.setPosition(0)
+            cursor.movePosition(QtGui.QTextCursor.Right, QtGui.QTextCursor.KeepAnchor, len(self.text_item.toPlainText()))
+            self.text_item.setTextCursor(cursor)
+            return
 
 
 class QxGroupNodeItem(QxNodeItem):
