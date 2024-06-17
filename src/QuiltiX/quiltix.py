@@ -819,9 +819,11 @@ class SaveDefinitionDialog(QDialog):
     def setup_ui(self):
         self.setWindowTitle("Save Node Definition")
 
+        self.l_groupHelp = HelpLabel(self, "The Node Group defines in which menu of the tabmenu the node definition will appear.")
         self.l_nodegroup = QLabel("Node Group:")
         self.e_nodegroup = QComboBox()
         self.e_nodegroup.addItems(self.nodegroups)
+        self.l_categoryHelp = HelpLabel(self, "The Category defines the name in the tabmenu of the new node definition.")
         self.l_category = QLabel("Category:")
         self.e_category = QLineEdit(self.node.NODE_NAME)
         self.l_path = QLabel("Save Path:   ")
@@ -840,16 +842,18 @@ class SaveDefinitionDialog(QDialog):
         self.e_nodegroup.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
         self.lo_main = QGridLayout(self)
-        self.lo_main.addWidget(self.l_nodegroup, 0, 0)
-        self.lo_main.addWidget(self.e_nodegroup, 0, 1, 1, 3)
-        self.lo_main.addWidget(self.l_category, 1, 0)
-        self.lo_main.addWidget(self.e_category, 1, 1, 1, 3)
-        self.lo_main.addWidget(self.l_path, 2, 0)
-        self.lo_main.addWidget(self.e_path, 2, 1, 1, 2)
-        self.lo_main.addWidget(self.b_path, 2, 3)
+        self.lo_main.addWidget(self.l_groupHelp, 0, 0)
+        self.lo_main.addWidget(self.l_nodegroup, 0, 1)
+        self.lo_main.addWidget(self.e_nodegroup, 0, 2, 1, 3)
+        self.lo_main.addWidget(self.l_categoryHelp, 1, 0)
+        self.lo_main.addWidget(self.l_category, 1, 1)
+        self.lo_main.addWidget(self.e_category, 1, 2, 1, 3)
+        self.lo_main.addWidget(self.l_path, 2, 1)
+        self.lo_main.addWidget(self.e_path, 2, 2, 1, 2)
+        self.lo_main.addWidget(self.b_path, 2, 4)
         self.lo_main.setRowStretch(3, 100)
-        self.lo_main.setColumnStretch(1, 100)
-        self.lo_main.addWidget(self.bb_main, 4, 2, 1, 2)
+        self.lo_main.setColumnStretch(2, 100)
+        self.lo_main.addWidget(self.bb_main, 4, 3, 1, 2)
         self.e_category.setFocus()
 
     def explore_save_path_triggered(self):
@@ -960,6 +964,27 @@ class SaveDefinitionDialog(QDialog):
 
         self.accept()
         self.signal_saved_def.emit(outpath)
+
+
+class HelpLabel(QLabel):
+
+    signalEntered = QtCore.Signal(object)
+
+    def __init__(self, parent, toolTipStr):
+        super(HelpLabel, self).__init__()
+        self.parent = parent
+        self.toolTipStr = toolTipStr
+
+        iconPath = os.path.join(ROOT, "resources", "icons", "help.png")
+        pixmap = QtGui.QIcon(iconPath).pixmap(20, 20)
+        self.setPixmap(pixmap)
+        self.setMouseTracking(True)
+
+    def enterEvent(self, event):
+        self.signalEntered.emit(self)
+
+    def mouseMoveEvent(self, event):
+        QtWidgets.QToolTip.showText(self.mapToGlobal(self.rect().center()), self.toolTipStr)
 
 
 def launch():
