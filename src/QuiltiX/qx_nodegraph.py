@@ -923,6 +923,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             pos=pos,
             push_undo=push_undo
         )
+        qx_node.create_property("nodedef", mx_node.getNodeDef())
         if create_ports:
             for output in mx_node.getOutputs():
                 color = qx_node_module.QxNodeBase._random_color_from_string(str(output.getType()))
