@@ -285,7 +285,7 @@ class QuiltiXWindow(QMainWindow):
         if dirpath not in os.getenv("PXR_MTLX_PLUGIN_SEARCH_PATHS", "").split(os.pathsep):
             os.environ["PXR_MTLX_PLUGIN_SEARCH_PATHS"] = os.getenv("PXR_MTLX_PLUGIN_SEARCH_PATHS", "") + os.pathsep + dirpath
 
-        self.qx_node_graph.load_mx_libraries([dirpath], library_folders=[])
+        self.qx_node_graph.load_mx_libraries(library_path=dirpath)
 
     def init_menu_bar(self):
         # region Tabs
@@ -730,7 +730,7 @@ class QuiltiXWindow(QMainWindow):
         self.qx_node_graph.load_mx_libraries(mx_stdlib_paths)
         mx_custom_lib_paths = mx_node.get_mx_custom_lib_paths()
         if mx_custom_lib_paths:
-            self.qx_node_graph.load_mx_libraries(mx_custom_lib_paths, library_folders=[])
+            self.qx_node_graph.load_mx_libraries(mx_custom_lib_paths)
 
         self.qx_node_graph.register_node(qx_node.QxGroupNode)
 

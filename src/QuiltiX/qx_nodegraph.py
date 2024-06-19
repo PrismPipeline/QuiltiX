@@ -100,19 +100,32 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         self.potentially_node_graph_changed.emit(self)
         super()._on_node_selected(node_id)
 
-    def load_mx_libraries(self, library_paths, library_folders=None):
+    def load_mx_libraries(self, search_paths=None, library_folders=None, library_path=None, add_to_lib_doc=True):
+        if search_paths is None:
+            search_paths = []
+
         if library_folders is None:
             library_folders = []
 
-        for library_path in library_paths:
-            search_path = mx.FileSearchPath(library_path)
-            defs = mx.loadLibraries(library_folders, search_path, self.mx_library_doc)
-            logger.debug(f"loaded definitions from {library_path}: {len(defs)}")
+        if add_to_lib_doc:
+            doc = self.mx_library_doc
+        else:
+            doc = mx.createDocument()
+            doc.importLibrary(self.mx_library_doc)
+
+        for search_path in search_paths:
+            mx_search_path = mx.FileSearchPath(search_path)
+            defs = mx.loadLibraries(library_folders, mx_search_path, doc)
+            logger.debug(f"loaded definitions from {search_path}: {len(defs)}")
+
+        if library_path:
+            mx.loadLibrary(library_path, doc)
+            logger.debug(f"loaded definitions from {library_path}")
 
         if self.mx_defs:
-            mx_defs = [mx_def for mx_def in self.mx_library_doc.getNodeDefs() if mx_def not in self.mx_defs]
+            mx_defs = [mx_def for mx_def in doc.getNodeDefs() if mx_def not in self.mx_defs]
         else:
-            mx_defs = self.mx_library_doc.getNodeDefs()
+            mx_defs = doc.getNodeDefs()
 
         new_defs = []
         if mx_defs:
@@ -131,7 +144,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                             node_type=node_type,
                         )
 
-        self.mx_defs = self.mx_library_doc.getNodeDefs()
+        self.mx_defs = doc.getNodeDefs()
         return new_defs
 
     def has_nodegraph_implementation(self, mx_def):
@@ -711,6 +724,8 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
     def validate_mtlx_doc(self, doc=None):
         doc = doc or self.get_current_mx_graph_doc()
+        doc = doc.copy()
+        doc.importLibrary(self.mx_library_doc)
         result = doc.validate()
         return result
 
@@ -737,7 +752,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         # _searchPath = _libraryDir
 
         # mx.readFromXmlFile(doc, path, _searchPath)
-        new_defs = self.load_mx_libraries([os.path.dirname(mx_file_path)])
+        new_defs = self.load_mx_libraries(library_path=mx_file_path, add_to_lib_doc=False)
         if new_defs:
             dirpath = os.path.dirname(mx_file_path)
             if dirpath not in os.getenv("PXR_MTLX_PLUGIN_SEARCH_PATHS", "").split(os.pathsep):
