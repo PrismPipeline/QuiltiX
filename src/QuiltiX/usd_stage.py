@@ -155,7 +155,11 @@ class MxStageController(QtCore.QObject):
         
         if qx_node.type_ == "Other.QxGroupNode":
             ng_name = qx_node.name()
-            in_port_node = qx_node.get_sub_graph().get_input_port_nodes()[0]
+            sub_graph = qx_node.get_sub_graph()
+            if not sub_graph:
+                return
+
+            in_port_node = sub_graph.get_input_port_nodes()[0]
             out_port = in_port_node.get_output(property_name)
             cports = out_port.connected_ports()
             if not cports:

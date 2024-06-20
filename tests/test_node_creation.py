@@ -1,5 +1,5 @@
 from examples.create_all_available_nodes import create_all_available_nodes
-from tests.examples.create_standard_surface import create_standard_surface
+from examples.create_standard_surface import create_standard_surface
 
 
 def test_create_all_available_nodes(qtbot):

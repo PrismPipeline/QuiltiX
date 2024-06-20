@@ -1,7 +1,7 @@
 import random
 import logging
 
-from qtpy import QtCore  # type: ignore
+from qtpy import QtCore, QtGui  # type: ignore
 
 import MaterialX as mx  # type: ignore
 from NodeGraphQt import BaseNode, GroupNode
@@ -612,7 +612,6 @@ class QxPortInputNode(PortInputNode):
             in_port.color = QxNodeBase._random_color_from_string(out_port.view.get_mx_port_type())
             in_port.model.name = name
             in_port.view.name = name
-            in_port.view.multi_connection = False  # refresh tooltip
             text_item = self.view.get_output_text_item(in_port.view)
             text_item.setPlainText(name)
             out_port.model.connected_ports[self.id] = [name]
@@ -861,6 +860,15 @@ class QxNodeItem(NodeItem):
         del port
         del text
 
+    def mouseDoubleClickEvent(self, event):
+        super(QxNodeItem, self).mouseDoubleClickEvent(event)
+        if self.text_item.textInteractionFlags() & QtCore.Qt.TextSelectableByMouse:
+            cursor = self.text_item.textCursor()
+            cursor.setPosition(0)
+            cursor.movePosition(QtGui.QTextCursor.Right, QtGui.QTextCursor.KeepAnchor, len(self.text_item.toPlainText()))
+            self.text_item.setTextCursor(cursor)
+            return
+
 
 class QxGroupNodeItem(QxNodeItem):
     def __init__(self, name='group', parent=None):
@@ -932,6 +940,11 @@ class QxGroupNodeItem(QxNodeItem):
             for node in self.viewer().graph.all_nodes():
                 if node.id == self.id:
                     return node
+                
+        name_rect = self.text_item.mapRectToItem(self, self.text_item.boundingRect())
+        if name_rect.contains(event.pos()):
+            super(QxGroupNodeItem, self).mouseDoubleClickEvent(event)
+            return
 
         node = get_node_of_node_item()
         if event.button() == QtCore.Qt.LeftButton:

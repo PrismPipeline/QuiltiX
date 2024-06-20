@@ -100,19 +100,32 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         self.potentially_node_graph_changed.emit(self)
         super()._on_node_selected(node_id)
 
-    def load_mx_libraries(self, library_paths, library_folders=None):
+    def load_mx_libraries(self, search_paths=None, library_folders=None, library_path=None, add_to_lib_doc=True):
+        if search_paths is None:
+            search_paths = []
+
         if library_folders is None:
             library_folders = []
 
-        for library_path in library_paths:
-            search_path = mx.FileSearchPath(library_path)
-            defs = mx.loadLibraries(library_folders, search_path, self.mx_library_doc)
-            logger.debug(f"loaded definitions from {library_path}: {len(defs)}")
+        if add_to_lib_doc:
+            doc = self.mx_library_doc
+        else:
+            doc = mx.createDocument()
+            doc.importLibrary(self.mx_library_doc)
+
+        for search_path in search_paths:
+            mx_search_path = mx.FileSearchPath(search_path)
+            defs = mx.loadLibraries(library_folders, mx_search_path, doc)
+            logger.debug(f"loaded definitions from {search_path}: {len(defs)}")
+
+        if library_path:
+            mx.loadLibrary(library_path, doc)
+            logger.debug(f"loaded definitions from {library_path}")
 
         if self.mx_defs:
-            mx_defs = [mx_def for mx_def in self.mx_library_doc.getNodeDefs() if mx_def not in self.mx_defs]
+            mx_defs = [mx_def for mx_def in doc.getNodeDefs() if mx_def not in self.mx_defs]
         else:
-            mx_defs = self.mx_library_doc.getNodeDefs()
+            mx_defs = doc.getNodeDefs()
 
         new_defs = []
         if mx_defs:
@@ -131,7 +144,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                             node_type=node_type,
                         )
 
-        self.mx_defs = self.mx_library_doc.getNodeDefs()
+        self.mx_defs = doc.getNodeDefs()
         return new_defs
 
     def has_nodegraph_implementation(self, mx_def):
@@ -492,9 +505,12 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                         output = mx_node.addOutput(
                             port_data["name"], port_type
                         )
-                        output.setConnectedNode(
-                            qx_node_ids_to_mx_nodes[connected_data[0]]
-                        )
+                        mx_sub_node = qx_node_ids_to_mx_nodes[connected_data[0]]
+                        if mx_node.getType() == "multioutput":
+                            con_output = mx_sub_node.getActiveOutput(connected_data[1])
+                            output.setConnectedOutput(con_output)
+                        else:
+                            output.setConnectedNode(mx_sub_node)
 
             elif node_data["type_"] in ["Inputs.QxPortInputNode", "Outputs.QxPortOutputNode"]:
                 continue
@@ -505,13 +521,13 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                     mx_node = main_mx_node_graph.addNode(
                         mx_def.getNodeString(),
                         node_data["name"],
-                        mx_def.getActiveOutputs()[0].getType(),
+                        mx_def.getType(),
                     )
                 else:
                     mx_node = mx_parent.addNode(
                         mx_def.getNodeString(),
                         node_data["name"],
-                        mx_def.getActiveOutputs()[0].getType(),
+                        mx_def.getType(),
                     )
             else:
                 logger.warning("node has no outputs: %s" % mx_def.getNodeString())
@@ -522,7 +538,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
             for input_data in node_data.get("input_ports", {}):
                 val = node_data.get("custom", {}).get(input_data["name"], node_data.get("custom", {}).get(input_data["name"] + "0"))
-                hasGeomProp = bool(mx_def.getActiveInput(input_data["name"]).getDefaultGeomProp())
+                hasGeomProp = mx_def and bool(mx_def.getActiveInput(input_data["name"]).getDefaultGeomProp())  # the inputnodes and outputnodes of nodegraphs don't have a mx definition
                 isConnected = None
                 if hasGeomProp:
                     for connection in serialized_data.get("connections", []):
@@ -558,6 +574,13 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                     if not hasGeomProp:
                         self.set_mx_input_value(mx_input, val)
 
+            for output_data in node_data.get("output_ports", {}):
+                if node_data["type_"] == "Other.QxGroupNode":
+                    continue
+                
+                mx_output_type = mx_def.getActiveOutput(output_data["name"]).getType()
+                mx_node.addOutput(output_data["name"], mx_output_type)
+
             qx_node_ids_to_mx_nodes[node_id] = mx_node
 
         if ng_abstraction:
@@ -576,7 +599,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
                         connected_node_data = serialized_data["nodes"][connection["in"][0]]
                         connected_mx_def = self.get_mx_node_def(connected_node_data["type_"], connected_node_data.get("custom", {}).get("type"))
-                        connected_port_type = connected_mx_def.getActiveOutputs()[0].getType()
+                        connected_port_type = connected_mx_def.getType()
                         if connected_port_type in ("material", "surfaceshader"):
                             output_name = f"output_{node_data['name']}_{output_data['name']}"
                             if main_mx_node_graph.getOutput(output_name):
@@ -586,9 +609,13 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                                 output_name,
                                 mx_output_type,
                             )
-                            main_mx_node_graph_output.setConnectedNode(
-                                qx_node_ids_to_mx_nodes[node_id]
-                            )
+                            mx_node = qx_node_ids_to_mx_nodes[node_id]
+                            if mx_node.getType() == "multioutput":
+                                output = mx_node.getActiveOutput(connection["out"][1])
+                                main_mx_node_graph_output.setConnectedOutput(output)
+                            else:
+                                main_mx_node_graph_output.setConnectedNode(mx_node)
+
                             if node_id not in main_mx_node_graph_outputs:
                                 main_mx_node_graph_outputs[node_id] = {}
 
@@ -620,9 +647,12 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                     main_mx_node_graph_outputs[connection["out"][0]][connection["out"][1]]
                 )
             else:
-                mx_input.setConnectedNode(
-                    qx_node_ids_to_mx_nodes[connection["out"][0]]
-                )
+                mx_node = qx_node_ids_to_mx_nodes[connection["out"][0]]
+                if mx_node.getType() == "multioutput":
+                    output = mx_node.getActiveOutput(connection["out"][1])
+                    mx_input.setConnectedOutput(output)
+                else:
+                    mx_input.setConnectedNode(mx_node)
 
         return mx_parent
 
@@ -639,7 +669,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             val = mx.PyMaterialXCore.Color4(val)
 
         # We do not need to set a value if it is connected to a node
-        if val != "" or mx_input_type == "string":
+        if val != "" or mx_input_type in ["string", "filename"]:
             if mx_input_type == "filename":
                 mx_input.setValueString(val)
                 mx_input.setAttribute("colorspace", "srgb_texture")
@@ -694,6 +724,8 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
     def validate_mtlx_doc(self, doc=None):
         doc = doc or self.get_current_mx_graph_doc()
+        doc = doc.copy()
+        doc.importLibrary(self.mx_library_doc)
         result = doc.validate()
         return result
 
@@ -714,15 +746,13 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             )
 
     def load_graph_from_mx_file(self, mx_file_path):
-        base_dir = os.path.dirname(os.path.abspath(mx_file_path))
-
         doc = mx.createDocument()
         # _libraryDir = os.path.join(os.path.join(self.core.extPath, "USD", "libraries"))
         # _searchPath = _libraryDir + mx.PATH_LIST_SEPARATOR + _exampleDir
         # _searchPath = _libraryDir
 
         # mx.readFromXmlFile(doc, path, _searchPath)
-        new_defs = self.load_mx_libraries([os.path.dirname(mx_file_path)])
+        new_defs = self.load_mx_libraries(library_path=mx_file_path, add_to_lib_doc=False)
         if new_defs:
             dirpath = os.path.dirname(mx_file_path)
             if dirpath not in os.getenv("PXR_MTLX_PLUGIN_SEARCH_PATHS", "").split(os.pathsep):
@@ -731,6 +761,17 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         mx.readFromXmlFile(doc, mx_file_path)
         self.load_graph_from_mx_doc(doc)
         self.mx_file_loaded.emit(mx_file_path)
+
+    def load_graph_from_mx_data(self, mx_data):
+        doc = mx.createDocument()
+        try:
+            mx.readFromXmlString(doc, mx_data)
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(self.get_root_graph().widget.parent(), "Warning", 'Failed to load XML data:\n\n%s' % e)
+            return
+
+        self.load_graph_from_mx_doc(doc)
+        self.mx_file_loaded.emit("")
 
     def load_graph_from_mx_doc(self, doc):
         with self.get_root_graph().block_save():
@@ -755,6 +796,9 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             for mx_graph in mx_graphs:
                 ng_node = self.create_nodegraph_from_mx_nodegraph(mx_graph)
                 for cur_mx_node in mx_graph.getNodes():
+                    if cur_mx_node.hasAttribute("xpos") and cur_mx_node.hasAttribute("ypos"):
+                        had_pos = True
+
                     cur_qx_node = self.create_node_from_mx_node(cur_mx_node, graph=ng_node.get_sub_graph())
                     # Change value type of node
                     qx_node_to_mx_node[cur_qx_node] = cur_mx_node
@@ -800,7 +844,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
             mx_connected_node = mx_input.getConnectedNode()
             if mx_connected_node:
-                if mx_connected_port:
+                if mx_connected_port and mx_connected_port.getParent().CATEGORY == "nodegraph":
                     port_node = qx_input_node.get_sub_graph().get_output_port_nodes()[0]
                     qx_input_port = port_node.get_input(mx_connected_port.getName())
                     mx_input_node_name = mx_connected_node.getName()
@@ -898,6 +942,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             pos=pos,
             push_undo=push_undo
         )
+        qx_node.create_property("nodedef", mx_node.getNodeDef())
         if create_ports:
             for output in mx_node.getOutputs():
                 color = qx_node_module.QxNodeBase._random_color_from_string(str(output.getType()))
