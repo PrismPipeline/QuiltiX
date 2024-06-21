@@ -780,8 +780,12 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             had_pos = False
             qx_node_to_mx_node = {}
 
+            mx_nodes = doc.getNodes()
+            mx_graphs = doc.getNodeGraphs()
+            doc.importLibrary(self.mx_library_doc)
+
             # Create Nodes
-            for cur_mx_node in doc.getNodes():
+            for cur_mx_node in mx_nodes:
                 if cur_mx_node.hasAttribute("xpos") and cur_mx_node.hasAttribute("ypos"):
                     had_pos = True
 
@@ -789,7 +793,7 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
 
                 qx_node_to_mx_node[cur_qx_node] = cur_mx_node
 
-            for mx_graph in doc.getNodeGraphs():
+            for mx_graph in mx_graphs:
                 ng_node = self.create_nodegraph_from_mx_nodegraph(mx_graph)
                 for cur_mx_node in mx_graph.getNodes():
                     if cur_mx_node.hasAttribute("xpos") and cur_mx_node.hasAttribute("ypos"):

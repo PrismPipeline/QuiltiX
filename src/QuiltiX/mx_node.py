@@ -102,13 +102,13 @@ def get_mx_node_group_dict(mx_node_defs):
         mx_node_group_dict.setdefault(mx_node_group, {})
         mx_node_group_key = mx_node_group_dict[mx_node_group]
 
-        mx_node_def_type = get_mx_node_def_type(mx_node_def)
+        mx_node_def_type = get_displaytype_from_mx_def(mx_node_def)
         mx_node_group_key.setdefault(mx_node_def_name, {})[mx_node_def_type] = mx_node_def
 
     return mx_node_group_dict
 
 
-def get_mx_node_def_type(mx_node_def):
+def get_displaytype_from_mx_def(mx_node_def):
     # return mx_node_def.getType()
 
     mx_node_def_string = mx_node_def.getNodeString()
@@ -127,4 +127,5 @@ def get_mx_node_def_type(mx_node_def):
         else "ND_"
     )
     mx_node_def_type = mx_node_def_full_name.replace(all_but_type_string, "")
+
     return mx_node_def_type

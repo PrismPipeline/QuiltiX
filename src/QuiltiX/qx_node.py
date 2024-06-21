@@ -101,38 +101,26 @@ class QxNode(QxNodeBase):
 
     @classmethod
     def from_mx_node(cls, mx_node, node_graph=None):
-        mx_def_type = cls.get_mx_def_type_from_mx_node(cls, mx_node)
+        mx_def_type = cls.get_displaytype_from_mx_node(cls, mx_node)
         qx_node = cls(node_type=mx_def_type, node_graph=node_graph)
         return qx_node
 
-    def get_mx_def_type_from_mx_node(self, mx_node):
-        def match_inputs(mx_node):
-            mx_node_input_types = [o.getType() for o in mx_node.getActiveInputs()]
-            for mx_def in self.possible_mx_defs.values():
-                mx_def_input_types = [o.getType() for o in mx_def.getActiveInputs()]
-                if mx_node_input_types == mx_def_input_types:
-                    # TODO reverse lookup from dict instead
-                    from QuiltiX.mx_node import get_mx_node_def_type
-                    return get_mx_node_def_type(mx_def)
-            return None
+    def get_displaytype_from_mx_node(self, mx_node):
+        from QuiltiX.mx_node import get_displaytype_from_mx_def
+        mx_def = mx_node.getNodeDef()
+        if mx_def:
+            return get_displaytype_from_mx_def(mx_def)
 
-        # TODO: is matching inputs enough?
-        if matched_def := match_inputs(mx_node):
-            return matched_def
-        elif (mx_node_type := mx_node.getType()) in self.possible_mx_defs:
-            return mx_node_type
-            # return self.possible_mx_defs[mx_node.getType()]
-        elif (mx_node_category := mx_node.getCategory()) in self.possible_mx_defs:
-            return mx_node_category
-        else:
-            # TODO: log error, definition can't be found
-            logger.warning(
-                f"Could not find matching definition for type '{mx_node.getType()}' of node '{mx_node.getName()}'."
-            )
-            return None
+        mx_category = mx_node.getCategory()
+        if mx_category in self.possible_mx_defs:
+            return mx_category
+
+        logger.warning(
+            f"Could not find matching definition for type '{mx_node.getType()}' of node '{mx_node.getName()}'."
+        )
 
     def update_from_mx_node(self, mx_node):
-        mx_def_type = self.get_mx_def_type_from_mx_node(mx_node)
+        mx_def_type = self.get_displaytype_from_mx_node(mx_node)
         if not mx_def_type:
             return
 
