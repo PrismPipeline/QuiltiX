@@ -40,6 +40,7 @@ from QuiltiX import mx_node
 from QuiltiX.constants import ROOT
 from QuiltiX.qx_node_property import PropertiesBinWidget
 from QuiltiX.qx_nodegraph import QxNodeGraph
+from QuiltiX.qx_plugin import QuiltiXPluginManager
 
 
 logging.basicConfig()
@@ -63,6 +64,9 @@ class QuiltiXWindow(QMainWindow):
         self.setWindowIcon(quiltix_icon)
         self.init_ui()
         self.init_menu_bar()
+
+        self.plugin_manaager = QuiltiXPluginManager(self, ROOT)
+        self.plugin_manaager.install_plugins()
 
         if load_style_sheet:
             self.loadStylesheet()
