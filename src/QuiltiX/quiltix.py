@@ -140,6 +140,11 @@ class QuiltiXWindow(QMainWindow):
             lambda: self.apply_material("volume", selection=True),
             node_type="Material.Volumematerial",
         )
+        self.expand_cmd = node_menu.add_command(
+            "Expand Nodegraph",
+            self.expand_selected_nodegraph,
+            node_type="Other.QxGroupNode",
+        )
         self.save_def_cmd = node_menu.add_command(
             "Save as new definition...",
             self.save_as_definition,
@@ -273,6 +278,11 @@ class QuiltiXWindow(QMainWindow):
 
         self.stage_ctrl.apply_material_to_prims(material_name, prims)
 
+    def expand_selected_nodegraph(self):
+        action = self.expand_cmd.qaction
+        node = self.qx_node_graph.get_node_by_id(action.node_id)
+        node.expand()
+
     def save_as_definition(self):
         action = self.save_def_cmd.qaction
         node = self.qx_node_graph.get_node_by_id(action.node_id)
@@ -296,17 +306,21 @@ class QuiltiXWindow(QMainWindow):
         # endregion Tabs
 
         # region File
-        load_mx_file = QAction("Load MaterialX file...", self)
+        load_mx_file = QAction("Load MaterialX File...", self)
         load_mx_file.triggered.connect(self.load_mx_file_triggered)
         self.file_menu.addAction(load_mx_file)
 
-        load_mx_file = QAction("Load MaterialX data...", self)
+        load_mx_file = QAction("Load MaterialX Data...", self)
         load_mx_file.triggered.connect(self.load_mx_data_triggered)
         self.file_menu.addAction(load_mx_file)
 
         save_mx_file = QAction("Save MaterialX...", self)
         save_mx_file.triggered.connect(self.save_mx_file_triggered)
         self.file_menu.addAction(save_mx_file)
+
+        save_mx_file_as = QAction("Save MaterialX As...", self)
+        save_mx_file_as.triggered.connect(self.save_mx_file_as_triggered)
+        self.file_menu.addAction(save_mx_file_as)
 
         self.file_menu.addSeparator()
 
@@ -541,6 +555,12 @@ class QuiltiXWindow(QMainWindow):
         self.qx_node_graph.load_graph_from_mx_data(xml_str)
 
     def save_mx_file_triggered(self):
+        if os.path.exists(self.current_filepath):
+            self.qx_node_graph.save_graph_as_mx_file(self.current_filepath)
+        else:
+            self.save_mx_file_as_triggered()
+
+    def save_mx_file_as_triggered(self):
         start_path = self.mx_selection_path
         if not start_path:
             start_path = self.geometry_selection_path

@@ -5,30 +5,30 @@
     "items":[
       {
         "type":"command",
-        "label":"Open...",
+        "label":"Load MaterialX File...",
         "file":"../examples/hotkeys/hotkey_functions.py",
-        "function_name":"open_session",
+        "function_name":"load_mtlx_file",
         "shortcut":"QtGui.QKeySequence.Open"
       },
       {
         "type":"command",
-        "label":"Import...",
+        "label":"Load MaterialX Data...",
         "file":"../examples/hotkeys/hotkey_functions.py",
-        "function_name":"import_session",
+        "function_name":"load_mtlx_data",
         "shortcut":""
       },
       {
         "type":"command",
-        "label":"Save...",
+        "label":"Save MaterialX",
         "file":"../examples/hotkeys/hotkey_functions.py",
-        "function_name":"save_session",
+        "function_name":"save_mtlx",
         "shortcut":"QtGui.QKeySequence.Save"
       },
       {
         "type":"command",
-        "label":"Save As...",
+        "label":"Save MaterialX As...",
         "file":"../examples/hotkeys/hotkey_functions.py",
-        "function_name":"save_session_as",
+        "function_name":"save_mtlx_as",
         "shortcut":"Ctrl+Shift+S"
       }
     ]
@@ -151,54 +151,28 @@
   },
   {
     "type":"menu",
-    "label":"&Graph",
+    "label":"&Background",
     "items":[
       {
-        "type":"menu",
-        "label":"&Background",
-        "items":[
-          {
-            "type":"command",
-            "label":"None",
-            "file":"../examples/hotkeys/hotkey_functions.py",
-            "function_name":"bg_grid_none",
-            "shortcut":"Alt+1"
-          },
-          {
-            "type":"command",
-            "label":"Lines",
-            "file":"../examples/hotkeys/hotkey_functions.py",
-            "function_name":"bg_grid_lines",
-            "shortcut":"Alt+2"
-          },
-          {
-            "type":"command",
-            "label":"Dots",
-            "file":"../examples/hotkeys/hotkey_functions.py",
-            "function_name":"bg_grid_dots",
-            "shortcut":"Alt+3"
-          }
-        ]
+        "type":"command",
+        "label":"None",
+        "file":"../examples/hotkeys/hotkey_functions.py",
+        "function_name":"bg_grid_none",
+        "shortcut":"Alt+1"
       },
       {
-        "type":"menu",
-        "label":"&Layout",
-        "items":[
-          {
-            "type":"command",
-            "label":"Horizontal",
-            "file":"../examples/hotkeys/hotkey_functions.py",
-            "function_name":"layout_h_mode",
-            "shortcut":"Shift+1"
-          },
-          {
-            "type":"command",
-            "label":"Vertical",
-            "file":"../examples/hotkeys/hotkey_functions.py",
-            "function_name":"layout_v_mode",
-            "shortcut":"Shift+2"
-          }
-        ]
+        "type":"command",
+        "label":"Lines",
+        "file":"../examples/hotkeys/hotkey_functions.py",
+        "function_name":"bg_grid_lines",
+        "shortcut":"Alt+2"
+      },
+      {
+        "type":"command",
+        "label":"Dots",
+        "file":"../examples/hotkeys/hotkey_functions.py",
+        "function_name":"bg_grid_dots",
+        "shortcut":"Alt+3"
       }
     ]
   },
@@ -229,16 +203,6 @@
         "file":"../examples/hotkeys/hotkey_functions.py",
         "function_name":"layout_graph_down",
         "shortcut":"Ctrl+L"
-      },
-      {
-        "type":"separator"
-      },
-      {
-        "type":"command",
-        "label":"Expand Group Node",
-        "file":"../examples/hotkeys/hotkey_functions.py",
-        "function_name":"expand_group_node",
-        "shortcut":"Return"
       }
     ]
   },
