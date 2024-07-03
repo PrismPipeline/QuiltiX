@@ -398,10 +398,13 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             return
 
         if self.auto_update_prop:
-            self.mx_parameter_changed.emit(qx_node, property_name, property_value)
-            self.refresh_validation()
-            if not self.is_root:
-                self.get_root_graph().mx_parameter_changed.emit(qx_node, property_name, property_value)
+            if self.is_root:
+                graph = self
+            else:
+                graph = self.get_root_graph()
+            
+            graph.refresh_validation()
+            graph.mx_parameter_changed.emit(qx_node, property_name, property_value)
 
     def on_port_disconnected(self, input_port=None, output_port=None):
         if not self.is_root:
@@ -587,6 +590,9 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             main_mx_node_graph_outputs = {}
             for node_id in serialized_data.get("nodes", []):
                 node_data = serialized_data["nodes"][node_id]
+                if node_data["type_"] in ["Inputs.QxPortInputNode", "Outputs.QxPortOutputNode"]:
+                    continue
+
                 mx_def = self.get_mx_node_def(node_data["type_"], node_data.get("custom", {}).get("type"))
                 for output_data in node_data.get("output_ports", {}):
                     mx_output_type = mx_def.getActiveOutput(output_data["name"]).getType()
@@ -598,6 +604,9 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                             continue
 
                         connected_node_data = serialized_data["nodes"][connection["in"][0]]
+                        if connected_node_data["type_"] in ["Inputs.QxPortInputNode", "Outputs.QxPortOutputNode"]:
+                            continue
+
                         connected_mx_def = self.get_mx_node_def(connected_node_data["type_"], connected_node_data.get("custom", {}).get("type"))
                         connected_port_type = connected_mx_def.getType()
                         if connected_port_type in ("material", "surfaceshader"):
@@ -632,7 +641,6 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
             if serialized_data["nodes"][connection["out"][0]]["type_"] in ["Inputs.QxPortInputNode"]:
                 mx_input.setInterfaceName(connection["out"][1])
                 mx_input.removeAttribute("value")
-                val = parent_graph_data["nodes"][parent_id].get("custom", {}).get(connection["out"][1])
                 continue
             
             connected_mx_node = qx_node_ids_to_mx_nodes[connection["out"][0]]

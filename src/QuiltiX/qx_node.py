@@ -566,14 +566,15 @@ class QxPortInputNode(PortInputNode):
             qgraphics_item or QxNodeItem, parent_port
         )
         self.set_port_deletion_allowed(True)
-        self.add_output("Next Input")
+        inpt = self.add_output("Next Input")
+        inpt.view.setToolTip("Next Input")
 
     def get_widget_type(self, name):
         return self.model.get_widget_type(name)
 
     def add_output(self, name='output', multi_output=True, display_name=True,
                    color=None, locked=False, painter_func=None):
-        super(PortInputNode, self).add_output(
+        outpt = super(PortInputNode, self).add_output(
             name=name,
             multi_output=multi_output,
             display_name=True,
@@ -592,6 +593,8 @@ class QxPortInputNode(PortInputNode):
                 self._outputs.append(self._outputs.pop(len(self._outputs)-2))
                 self.update()
                 self.view.draw_node()
+
+        return outpt
 
     def on_output_connected(self, in_port, out_port):
         if in_port.name() == "Next Input":
@@ -621,7 +624,8 @@ class QxPortInputNode(PortInputNode):
                 value=name,
                 widget_type=NodePropWidgetEnum.QLINE_EDIT.value,
             )
-            self.add_output("Next Input")
+            outpt = self.add_output("Next Input")
+            outpt.view.setToolTip("Next Input")
 
             props = out_port.node().model._graph_model.get_node_common_properties(out_port.node().type_)
             widget_type = props[out_port.name()]["widget_type"]
@@ -630,7 +634,9 @@ class QxPortInputNode(PortInputNode):
                 value=out_port.node().get_property(out_port.name()),
                 widget_type=widget_type,
             )
-            self.graph.node.add_input(name, color=in_port.color)
+            ng_port = self.graph.node.add_input(name, color=in_port.color)
+            in_port.view.setToolTip(out_port.view.get_mx_port_type())
+            ng_port.view.setToolTip(out_port.view.get_mx_port_type())
 
     def on_output_disconnected(self, in_port, out_port):
         if not getattr(self.graph, "is_collapsing", False):
@@ -676,7 +682,8 @@ class QxPortOutputNode(PortOutputNode):
             qgraphics_item or QxNodeItem, parent_port
         )
         self.set_port_deletion_allowed(True)
-        self.add_input("Next Output")
+        outpt = self.add_input("Next Output")
+        outpt.view.setToolTip("Next Output")
 
     def get_widget_type(self, name):
         return self.model.get_widget_type(name)
@@ -688,7 +695,7 @@ class QxPortOutputNode(PortOutputNode):
         #         '"{}.add_input()" only ONE input is allowed for this node.'
         #         .format(self.__class__.__name__, self)
         #     )
-        super(PortOutputNode, self).add_input(
+        inpt = super(PortOutputNode, self).add_input(
             name=name,
             multi_input=multi_input,
             display_name=True,
@@ -708,9 +715,13 @@ class QxPortOutputNode(PortOutputNode):
                 self.update()
                 self.view.draw_node()
 
+        return inpt
+
     def on_input_connected(self, in_port, out_port):
+        port_color = QxNodeBase._random_color_from_string(out_port.view.get_mx_port_type())
+        in_port.color = port_color
+        name = "out_" + out_port.node().name()
         if in_port.name() == "Next Output":
-            name = "out_" + out_port.node().name()
             while self.get_input(name):
                 if "_" in name:
                     base, suffix = name.rsplit("_", 1)
@@ -724,7 +735,6 @@ class QxPortOutputNode(PortOutputNode):
                 else:
                     name += "_1"
 
-            in_port.color = QxNodeBase._random_color_from_string(out_port.view.get_mx_port_type())
             in_port.model.name = name
             in_port.view.name = name
             in_port.view.multi_connection = False  # refresh tooltip
@@ -737,8 +747,15 @@ class QxPortOutputNode(PortOutputNode):
                 value=name,
                 widget_type=NodePropWidgetEnum.QLINE_EDIT.value,
             )
-            self.add_input("Next Output")
-            self.graph.node.add_output(name, color=in_port.color)
+            next_out = self.add_input("Next Output")
+            next_out.view.setToolTip("Next Output")
+            ng_port = self.graph.node.add_output(name, color=in_port.color)
+        else:
+            ng_port = self.graph.node.outputs()[in_port.name()]
+            ng_port.color = port_color
+
+        in_port.view.setToolTip(out_port.view.get_mx_port_type())
+        ng_port.view.setToolTip(out_port.view.get_mx_port_type())
 
     def on_input_disconnected(self, in_port, out_port):
         if getattr(self.graph, "is_collapsing", False):
