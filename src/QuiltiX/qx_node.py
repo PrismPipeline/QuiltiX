@@ -760,9 +760,6 @@ class QxPortOutputNode(PortOutputNode):
     def on_input_disconnected(self, in_port, out_port):
         if getattr(self.graph, "is_collapsing", False):
             return
-        
-        if self.graph._viewer._start_port:
-            return  # is in a live connection
 
         self.graph.node.get_output(in_port.name()).clear_connections()
         self.graph.node.delete_output(in_port.name())
