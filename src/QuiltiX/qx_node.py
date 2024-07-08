@@ -639,7 +639,7 @@ class QxPortInputNode(PortInputNode):
             ng_port.view.setToolTip(out_port.view.get_mx_port_type())
 
     def on_output_disconnected(self, in_port, out_port):
-        if not getattr(self.graph, "is_collapsing", False):
+        if not getattr(self.graph, "is_collapsing", False) and not in_port.connected_ports():
             self.graph.node.get_input(in_port.name()).clear_connections()
             self.graph.node.delete_input(in_port.name())
             del self.properties()["custom"][f"Input #{self.output_ports().index(in_port) + 1}"]
@@ -760,9 +760,6 @@ class QxPortOutputNode(PortOutputNode):
     def on_input_disconnected(self, in_port, out_port):
         if getattr(self.graph, "is_collapsing", False):
             return
-        
-        if self.graph._viewer._start_port:
-            return  # is in a live connection
 
         self.graph.node.get_output(in_port.name()).clear_connections()
         self.graph.node.delete_output(in_port.name())
