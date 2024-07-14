@@ -1,47 +1,52 @@
-import os
-import sys
-import subprocess
-import webbrowser
+# ruff: noqa: E402 || due to the plugin manager execution
 import logging
+import os
+import subprocess
+import sys
+import webbrowser
 from importlib import metadata
+
+# Setup plugin manager here before we import a lot of the modules
+from QuiltiX import qx_plugin
+
+plugin_manager = qx_plugin.QuiltiXPluginManager("QuiltiX")
+plugin_manager.load_plugins_from_environment_variable()
+plugin_manager.add_hookspecs(qx_plugin.QuiltixHookspecs)
+
+plugin_manager.hook.before_mx_import()
+
+import MaterialX as mx
+
+
+plugin_manager.hook.before_pxr_import()
+from pxr import Usd, UsdShade
 
 from qtpy import QtCore, QtGui, QtWidgets  # type: ignore
 from qtpy.QtWidgets import (  # type: ignore
     QAction,
     QActionGroup,
-    QMenu,
-    QDockWidget,
-    QMainWindow,
-    QFileDialog,
     QApplication,
-    QTextEdit,
-    QMessageBox,
+    QComboBox,
     QDialog,
+    QDialogButtonBox,
+    QDockWidget,
+    QFileDialog,
+    QGridLayout,
     QLabel,
     QLineEdit,
+    QMainWindow,
+    QMenu,
+    QMessageBox,
     QPushButton,
-    QDialogButtonBox,
-    QGridLayout,
-    QVBoxLayout,
     QSizePolicy,
-    QComboBox,
+    QTextEdit,
+    QVBoxLayout,
 )
 
-from pxr import UsdShade, Usd
-from pxr.Usdviewq.stageView import StageView # type: ignore
-import MaterialX as mx
-
-from QuiltiX import usd_render_settings
-from QuiltiX import usd_stage
-from QuiltiX import usd_stage_tree
-from QuiltiX import usd_stage_view
-from QuiltiX import qx_node
-from QuiltiX import mx_node
+from QuiltiX import mx_node, qx_node, usd_render_settings, usd_stage, usd_stage_tree, usd_stage_view
 from QuiltiX.constants import ROOT
 from QuiltiX.qx_node_property import PropertiesBinWidget
 from QuiltiX.qx_nodegraph import QxNodeGraph
-from QuiltiX.qx_plugin import QuiltiXPluginManager
-
 
 logging.basicConfig()
 logging.root.setLevel("DEBUG")
@@ -57,6 +62,9 @@ class QuiltiXWindow(QMainWindow):
         self.geometry_selection_path = ""
         self.hdri_selection_path = ""
         self.viewer_enabled = True
+
+        plugin_manager.hook.before_ui_init(editor=self)
+
         self.stage_ctrl = usd_stage.MxStageController(self)
 
         quiltix_logo_path = os.path.join(ROOT, "resources", "icons", "quiltix-logo-x.png")
@@ -65,8 +73,7 @@ class QuiltiXWindow(QMainWindow):
         self.init_ui()
         self.init_menu_bar()
 
-        self.plugin_manaager = QuiltiXPluginManager(self, ROOT)
-        self.plugin_manaager.install_plugins()
+        plugin_manager.hook.after_ui_init(editor=self)
 
         if load_style_sheet:
             self.loadStylesheet()

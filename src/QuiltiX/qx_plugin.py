@@ -1,61 +1,89 @@
-import importlib.util, os, logging
+import importlib.util
+import logging
+import os
+from pathlib import Path
+from typing import TYPE_CHECKING, List, Union
+
+import pluggy
+
+if TYPE_CHECKING:
+    from QuiltiX import quiltix
+
+
+PLUGINS_ENV_VAR = "QUILTIX_PLUGIN_FOLDER"
+PLUGIN_FILE_NAME = "plugin"
+PLUGIN_ID_FUNCTION_NAME = "plugin_id"
 
 logger = logging.getLogger(__name__)
+hookspec = pluggy.HookspecMarker("QuiltiX")
+hookimpl = pluggy.HookimplMarker("QuiltiX")
 
-class QuiltiXPlugin():
-    def __init__(self):
-        self.id = ""
-        self.plugin = None
+PathOrStr = Union[Path, str]
 
-class QuiltiXPluginManager():
-    def __init__(self, editor, root):
-        self.editor = editor
-        self.root = root
-        self.plugins = []
 
-    def install_plugins(self):
-        self.plugins = []
-        plugin_roots = [os.path.join(self.root, "plugins"), os.getenv("QUILTIX_PLUGIN_FOLDER", "")]
-        for plugin_folder in plugin_roots:
-            if os.path.exists(plugin_folder):
-                absolute_plugin_folder = os.path.abspath(plugin_folder)
-                logger.debug(f"Loading plugin from {absolute_plugin_folder}...")                
-                self.install_plugins_from_folder(plugin_folder)
+class QuiltiXPluginManager(pluggy.PluginManager):
+    def load_plugins_from_dir(self, plugin_root_dir: PathOrStr):
+        if not os.path.isdir(plugin_root_dir):
+            raise FileNotFoundError(f"Plugin dir: '{plugin_root_dir}' does not exist.")
 
-    def install_plugins_from_folder(self, plugin_folder):
-        if not os.path.isdir(plugin_folder):
-            logger.warning(f"Plugin folder {plugin_folder} not found.")
+        plugin_root_dir = Path(plugin_root_dir)
+        for dir in plugin_root_dir.iterdir():
+            if not dir.is_dir():
+                continue
+
+            # Check for the presence of plugin.py in the subfolder
+            plugin_file = dir / "plugin.py"
+            if not plugin_file.is_file():
+                continue
+
+            module_name = f"{str(dir)}.plugin"
+            spec = importlib.util.spec_from_file_location(module_name, plugin_file)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+
+            # Check for presence of PLUGIN_ID_FUNCTION_NAME function
+            if hasattr(module, PLUGIN_ID_FUNCTION_NAME):
+                plugin_id_function = getattr(module, PLUGIN_ID_FUNCTION_NAME)
+                plugin_id_name = plugin_id_function()
+                self.register(module, plugin_id_name)
+                logger.info(f"Registered plugin '{plugin_id_name} at {module.__file__}")
+            else:
+                logger.warning(
+                    f"Found plugin at {module.__file__}, but i does not have a '{PLUGIN_ID_FUNCTION_NAME}' function."
+                )
+
+    def load_plugins_from_environment_variable(self, environment_variable: str = PLUGINS_ENV_VAR):
+        env_value: str = os.getenv(environment_variable, "")
+        env_values: List[str] = [i for i in env_value.split(";") if i]
+        if not env_values:
             return
-        
-        # Get the list of all subfolders in the plugin_folder
-        for entry in os.listdir(plugin_folder):
-            entry_path = os.path.join(plugin_folder, entry)
 
-            if os.path.isdir(entry_path):
-                # Check for the presence of plugin.py in the subfolder
-                plugin_file = os.path.join(entry_path, 'plugin.py')
-                if os.path.isfile(plugin_file):
-                    module_name = f"{entry}.plugin"
+        plugin_root_dirs: List[Path] = [Path(i) for i in env_values if Path(i).is_dir()]
+        for plugin_root_dir in plugin_root_dirs:
+            self.load_plugins_from_dir(plugin_root_dir)
 
-                    # Dynamically import the module
-                    spec = importlib.util.spec_from_file_location(module_name, plugin_file)
-                    module = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(module)
 
-                    # Call module install_plugin function if it exists
-                    if hasattr(module, "install_plugin"):
-                        pluginInfo = QuiltiXPlugin()
-                        module.install_plugin(self.editor, self.root, pluginInfo)
-                        if pluginInfo.id and pluginInfo.plugin:
-                            pluginExists = None
-                            for installed_plugin in self.plugins:
-                                if installed_plugin.id == pluginInfo.id:
-                                    pluginExists = installed_plugin
-                                    break   
-                            if pluginExists:
-                                logger.warning(f"Plugin with id {pluginInfo.id} already installed.")
-                            else:
-                                self.plugins.append(pluginInfo)
-                                logger.debug(f"Installed plugin {pluginInfo.id} from {plugin_file}.")
-                    else:
-                        logger.warning(f"No installPlugin function found in {plugin_file}.")    
+class QuiltixHookspecs:
+    @hookspec
+    def after_ui_init(self, editor: "quiltix.QuiltiXWindow"):
+        """
+        :param editor: The QuiltiX Window
+        """
+
+    @hookspec
+    def before_ui_init(self, editor: "quiltix.QuiltiXWindow"):
+        """
+        :param editor: The QuiltiX Window
+        """
+
+    @hookspec
+    def before_mx_import(self):
+        """
+        This allows any code to execute before MaterialX gets imported
+        """
+
+    @hookspec
+    def before_pxr_import(self):
+        """
+        This allows any code to execute before OpenUSD's pxr gets imported
+        """

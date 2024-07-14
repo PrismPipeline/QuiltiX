@@ -22,6 +22,7 @@ classifiers = [
 ]
 
 dependencies = [
+    "pluggy",
     "materialx==1.38.9",
     "QtPy",
     "PySide6~=6.6",
@@ -45,6 +46,10 @@ dev = [
     # TODO
     # "MaterialX-stubs @ git+https://github.com/manuelkoester/MaterialX-stubs.git@7696cbb"
 ]
+plugins = [
+    "materialxjson"
+]
+
 
 # TODO
 # usd = [
