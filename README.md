@@ -138,7 +138,7 @@ Essentially you need to add all `.dll`s to `PATH` and the `pxr` python library t
 | Environment Variable | Path relative to compiled ${USD_ROOT} |
 |-|-|
 | PATH | ${USD_ROOT}/bin | 
-| PATH | ${USD_ROOT}/lib | .dlls within bin |
+| PATH | ${USD_ROOT}/lib | 
 | PYTHONPATH | ${USD_ROOT}/lib/python |
 
 
