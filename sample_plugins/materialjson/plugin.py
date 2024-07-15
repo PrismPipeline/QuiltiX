@@ -48,9 +48,7 @@ class QuiltiX_JSON_serializer:
 
         # Show JSON text. Does most of export, except does not write to file
         show_json_text = QAction("Show as JSON...", editor)
-        editor.show_json_triggered = self.show_json_triggered
-        show_json_text.triggered.connect(editor.show_json_triggered)
-        # show_json_text.triggered.connect(self.show_json_triggered)
+        show_json_text.triggered.connect(self.show_json_triggered)
         gltfMenu.addAction(show_json_text)
 
     def set_indent(self, indent):
