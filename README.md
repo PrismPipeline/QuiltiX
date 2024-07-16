@@ -26,6 +26,7 @@ QuiltiX is a graphical node editor to edit, and author [MaterialX](https://mater
 - [Running QuiltiX](#running-quiltix)
   - [Running QuiltiX using hython](#running-quiltix-using-hython)
 - [Integrating with your environment](#integrating-with-your-environment)
+  - [Using your own compiled OpenUSD](#using-your-own-compiled-openusd)
   - [Adding Hydra delegates](#adding-hydra-delegates)
     - [Arnold](#arnold)
     - [Karma](#karma)
@@ -128,6 +129,18 @@ Overview over the most important Environment Variables:
 | PXR_MTLX_STDLIB_SEARCH_PATHS | Paths to standard MaterialX node definition locations | Paths | |
 | PXR_MTLX_PLUGIN_SEARCH_PATHS | Paths to custom MaterialX node definition locations | Paths | |
 | HD_DEFAULT_RENDERER | Name of the default Hydra delegate for the viewport | String | GL |
+
+### Using your own compiled OpenUSD
+
+To be able to use your own version of OpenUSD for QuiltiX instead of relying on our [provided version](https://github.com/PrismPipeline/OpenUSD_build), you will need to provide some environment variables. Make sure that you append to them!  
+Essentially you need to add all `.dll`s to `PATH` and the `pxr` python library to `PYTHONPATH`.
+
+| Environment Variable | Path relative to compiled ${USD_ROOT} |
+|-|-|
+| PATH | ${USD_ROOT}/bin | 
+| PATH | ${USD_ROOT}/lib | 
+| PYTHONPATH | ${USD_ROOT}/lib/python |
+
 
 ### Adding [Hydra delegates](https://openusd.org/release/glossary.html#hydra)
 > **_NOTE_**  
