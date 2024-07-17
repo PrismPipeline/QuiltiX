@@ -75,7 +75,7 @@ class QuiltiX_JSON_serializer:
 
     def show_json_triggered(self):
         """
-        Show the current USD Stage.
+        Show the current JSON text in a text box.
         """
         if not have_jsoncore:
             logger.error("materialxjson package is not installed")

@@ -76,7 +76,7 @@ class QuiltiXPluginManager(pluggy.PluginManager):
 
     def load_plugins_from_environment_variable(self, environment_variable: str = PLUGINS_ENV_VAR):
         env_value: str = os.getenv(environment_variable, "")
-        env_values: List[str] = [i for i in env_value.split(";") if i]
+        env_values: List[str] = [i for i in env_value.split(os.pathsep) if i]
         if not env_values:
             return
 
