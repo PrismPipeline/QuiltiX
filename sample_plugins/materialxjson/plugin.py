@@ -2,6 +2,16 @@
 
 import logging
 import os
+
+# Optional syntax highlighting if pygments is installed
+have_highliting = True
+try:
+    from pygments import highlight
+    from pygments.lexers import JsonLexer
+    from pygments.formatters import HtmlFormatter
+except ImportError:
+    have_highliting = False
+
 from typing import TYPE_CHECKING
 
 from qtpy import QtCore  # type: ignore
@@ -23,6 +33,24 @@ except ImportError:
 if TYPE_CHECKING:
     from QuiltiX import quiltix
 
+
+class JsonHighlighter:
+    def __init__(self):
+        self.lexer = JsonLexer()
+        # We don't add line numbers since this get's copied with
+        # copy-paste.
+        self.formatter = HtmlFormatter(linenos=False, style='github-dark')
+
+    def highlight(self, text):
+        highlighted_html = highlight(text, self.lexer, self.formatter)
+        styles = (
+            f"<style>"
+            f"{self.formatter.get_style_defs('.highlight')}"
+            f"pre {{ line-height: 1.0; margin: 0; }}"
+            f"</style>"
+        )
+        full_html = f"<html><head>{styles}</head><body>{highlighted_html}</body></html>"     
+        return full_html
 
 class QuiltiX_JSON_serializer:
     def __init__(self, editor, root):
@@ -147,11 +175,18 @@ class QuiltiX_JSON_serializer:
         Show a text box with the given text.
         """
         te_text = QTextEdit()
-        te_text.setText(text)
         te_text.setReadOnly(True)
         te_text.setParent(self.editor, QtCore.Qt.Window)
         te_text.setWindowTitle(title)
         te_text.resize(1000, 800)
+
+        if have_highliting:
+            jsonHighlighter = JsonHighlighter()
+            highlighted_html = jsonHighlighter.highlight(text)
+            te_text.setHtml(highlighted_html)
+        else:
+            te_text.setPlainText(text)        
+
         te_text.show()
 
 
