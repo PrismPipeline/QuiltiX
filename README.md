@@ -144,7 +144,10 @@ def plugin_name() -> str:
 If your plugin has the possibility to not be valid (due to missing dependencies or similar) you can implement a `is_valid` function returning `False` to avoid it loading entirely. Example:
 ```python
 def is_valid() -> bool:
-    return has_materialxjson
+    if 1==1:
+      return False
+    else:
+      return True
   ```
 
 For further reference please take a look at the `sample_plugins` dir and the tests in `tests/test_plugins.py`
