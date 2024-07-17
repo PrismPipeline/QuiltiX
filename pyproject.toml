@@ -77,6 +77,8 @@ addopts = "--cov=QuiltiX"
 testpaths = [
     "tests",
 ]
+log_cli=true
+log_level="DEBUG"
 
 [tool.isort]
 profile = "black"

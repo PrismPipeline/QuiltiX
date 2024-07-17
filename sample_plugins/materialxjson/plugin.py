@@ -12,13 +12,13 @@ from qtpy.QtWidgets import (  # type: ignore
 from QuiltiX import constants, qx_plugin
 
 logger = logging.getLogger(__name__)
-have_jsoncore = True
+has_materialxjsoncore = True
 
 try:
     import materialxjson.core as jsoncore
 except ImportError:
-    have_jsoncore = False
-    logger.error("materialxjso package is not installed")
+    has_materialxjsoncore = False
+    logger.error("materialxjson.core module not found")
 
 if TYPE_CHECKING:
     from QuiltiX import quiltix
@@ -63,9 +63,6 @@ class QuiltiX_JSON_serializer:
         """
         Get the JSON for the given MaterialX document.
         """
-        if not have_jsoncore:
-            return None
-
         doc = self.editor.qx_node_graph.get_current_mx_graph_doc()
         if doc:
             exporter = jsoncore.MaterialXJson()
@@ -75,12 +72,8 @@ class QuiltiX_JSON_serializer:
 
     def show_json_triggered(self):
         """
-        Show the current JSON text in a text box.
+        Show the JSON for the current MaterialX document.
         """
-        if not have_jsoncore:
-            logger.error("materialxjson package is not installed")
-            return
-
         json_result = self.get_json_from_graph()
 
         # Write JSON UI text box
@@ -92,10 +85,6 @@ class QuiltiX_JSON_serializer:
         """
         Export the current graph to a JSON file.
         """
-        if not have_jsoncore:
-            logger.error("materialxjson package is not installed")
-            return
-
         start_path = self.editor.mx_selection_path
         if not start_path:
             start_path = self.editor.geometry_selection_path
@@ -127,10 +116,6 @@ class QuiltiX_JSON_serializer:
         """
         Import a JSON file into the current graph.
         """
-        if not have_jsoncore:
-            logger.error("materialxjson package is not installed")
-            return
-
         start_path = self.editor.mx_selection_path
         if not start_path:
             start_path = self.editor.geometry_selection_path
@@ -172,15 +157,12 @@ class QuiltiX_JSON_serializer:
 
 @qx_plugin.hookimpl
 def after_ui_init(editor: "quiltix.QuiltiXWindow"):
-    if have_jsoncore:
-        editor.json_serializer = QuiltiX_JSON_serializer(editor, constants.ROOT)
-    else:
-        editor.json_serializer = None
+    editor.json_serializer = QuiltiX_JSON_serializer(editor, constants.ROOT)
 
-def plugin_id() -> str:
-    if have_jsoncore:
-        return "MaterialX JSON Serializer"
-    return ""
+
+def plugin_name() -> str:
+    return "MaterialX JSON Serializer"
+
 
 def is_valid() -> bool:
-    return have_jsoncore
+    return has_materialxjsoncore
