@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 PLUGINS_ENV_VAR = "QUILTIX_PLUGIN_FOLDER"
 PLUGIN_FILE_NAME = "plugin"
 PLUGIN_ID_FUNCTION_NAME = "plugin_id"
+PLUGIN_VALID_FUNCTION_NAME = "is_valid"
 
 logger = logging.getLogger(__name__)
 hookspec = pluggy.HookspecMarker("QuiltiX")
@@ -41,16 +42,37 @@ class QuiltiXPluginManager(pluggy.PluginManager):
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
 
-            # Check for presence of PLUGIN_ID_FUNCTION_NAME function
-            if hasattr(module, PLUGIN_ID_FUNCTION_NAME):
-                plugin_id_function = getattr(module, PLUGIN_ID_FUNCTION_NAME)
-                plugin_id_name = plugin_id_function()
-                self.register(module, plugin_id_name)
-                logger.info(f"Registered plugin '{plugin_id_name} at {module.__file__}")
+            # Check validity of plugin after loading
+            is_valid = True
+            if hasattr(module, PLUGIN_VALID_FUNCTION_NAME):
+                plugin_valid_function = getattr(module, PLUGIN_VALID_FUNCTION_NAME)
+                if not plugin_valid_function():
+                    logger.warning(
+                        f"Found plugin at {module.__file__}, but it is not valid for loading."
+                    )
+                    is_valid = False
             else:
                 logger.warning(
-                    f"Found plugin at {module.__file__}, but i does not have a '{PLUGIN_ID_FUNCTION_NAME}' function."
-                )
+                    f"Found plugin at {module.__file__}, but it does not have a '{PLUGIN_VALID_FUNCTION_NAME}' function."                
+                )                
+                is_valid = False                
+
+            if is_valid:
+                # Check for presence of PLUGIN_ID_FUNCTION_NAME function
+                if hasattr(module, PLUGIN_ID_FUNCTION_NAME):
+                    plugin_id_function = getattr(module, PLUGIN_ID_FUNCTION_NAME)
+                    plugin_id_name = plugin_id_function()
+                    if plugin_id_function and len(plugin_id_name) > 0:
+                        self.register(module, plugin_id_name)
+                        logger.info(f"Registered plugin '{plugin_id_name} at {module.__file__}")
+                    else:
+                        logger.warning(
+                            f"Found plugin at {module.__file__}, but has an invalid identifier '{plugin_id_name}'."
+                        )
+                else:
+                    logger.warning(
+                        f"Found plugin at {module.__file__}, but it does not have a '{PLUGIN_ID_FUNCTION_NAME}' function."
+                    )
 
     def load_plugins_from_environment_variable(self, environment_variable: str = PLUGINS_ENV_VAR):
         env_value: str = os.getenv(environment_variable, "")
