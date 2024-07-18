@@ -2,7 +2,7 @@ import os
 import sys
 from contextlib import contextmanager
 
-from Qt.QtWidgets import QApplication  # type: ignore
+from qtpy.QtWidgets import QApplication  # type: ignore
 
 from QuiltiX import quiltix
 
@@ -27,7 +27,6 @@ def quiltix_instance(load_shaderball=True, load_default_graph=False):
         load_shaderball=load_shaderball,
         load_default_graph=load_default_graph
     )
-    editor.show()
     yield editor
 
     # The QApplication provided py pytest-qt does not need to be exited

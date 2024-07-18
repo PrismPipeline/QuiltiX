@@ -25,6 +25,9 @@ QuiltiX is a graphical node editor to edit, and author [MaterialX](https://mater
   - [From Source](#from-source)
 - [Running QuiltiX](#running-quiltix)
   - [Running QuiltiX using hython](#running-quiltix-using-hython)
+- [QuiltiX Plugins](#quiltix-plugins)
+  - [Creating a QuiltiX plugin](#creating-a-quiltix-plugin)
+  - [QuiltiX Plugin hooks](#quiltix-plugin-hooks)
 - [Integrating with your environment](#integrating-with-your-environment)
   - [Using your own compiled OpenUSD](#using-your-own-compiled-openusd)
   - [Adding Hydra delegates](#adding-hydra-delegates)
@@ -118,6 +121,50 @@ set PYTHONPATH=%PYTHONPATH%;%VIRTUAL_ENV%/Lib/site-packages;./src
 ```
 > Note that currently both the Storm as well as HoudiniGL render delegates do not seem to work in QuiltiX when being launched from hython.
 </details>
+
+## QuiltiX Plugins
+
+QuiltiX supports adding Plugins via the environment variable `QUILTIX_PLUGIN_PATHS`. We are using [pluggy](https://pluggy.readthedocs.io/en/stable/) in the backend to load them.
+
+### Creating a QuiltiX plugin
+To create a QuiltiX plugin you need to create a `plugin.py` file. In this file you need implement one or multiple `hooks` that QuiltiX provides. Example:
+
+```python
+@qx_plugin.hookimpl
+def after_ui_init(editor: "quiltix.QuiltiXWindow"):
+    # I am printing the QuiltiXWindow
+    print(editor)
+```
+
+You also need to implement a `plugin_name` function returning the name of your plugin. Example:
+```python
+def plugin_name() -> str:
+    return "QuiltiXWindow printer"
+```
+
+If your plugin has the possibility to not be valid (due to missing dependencies or similar) you can implement a `is_valid` function returning `False` to avoid it loading entirely. Example:
+```python
+def is_valid() -> bool:
+    if 1==1:
+      return False
+    else:
+      return True
+  ```
+
+For further reference please take a look at the `sample_plugins` dir and the tests in `tests/test_plugins.py`
+
+### QuiltiX Plugin hooks
+These are the hooks that are currently supported, but there is no harm in adding more. If you would like to add hooks in other parts of QuiltiX to support your features, please open an Issue/PR. 
+The hook specifications live in `src/QuiltiX/qx_plugin.py`
+| hook | Purpose |
+|-|-|
+| before_ui_init | Building UI funcionality on top of the QuiltiX UI |
+| after_ui_init | Adjusting parts of the internals before the QuiltiX UI startup |
+| before_mx_import | Adjusting things like environment variables before MaterialX gets initialized |
+| after_mx_import | Adjusting MaterialX specific functionality right after it gets imported |
+| before_pxr_import | Adjusting things like environment variables before pxr (OpenUSD) gets initialized |
+| after_pxr_import | Adjusting pxr (OpenUSD) specific functionality right after it gets imported |
+
 
 ## Integrating with your environment
 QuiltiX tries to rely as much as possible on pre-existing environment variables from MaterialX/USD to extend its systems.
