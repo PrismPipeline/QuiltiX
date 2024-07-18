@@ -29,7 +29,6 @@ dependencies = [
     "PyOpenGL",
     "PyOpenGL_accelerate",
     # "OpenUSD_build @ git+https://github.com/PrismPipeline/OpenUSD_build.git@24.03-win-mtlx-1.38.9"
-    # TODO
     "NodeGraphQt-QuiltiX-fork~=0.7",
 ]
 
@@ -43,21 +42,17 @@ dev = [
     "pytest",
     "pytest-qt",
     "pytest-cov",
-    # TODO
     # "MaterialX-stubs @ git+https://github.com/manuelkoester/MaterialX-stubs.git@7696cbb"
 ]
 plugins = [
+    "pygments",
     "materialxjson"
 ]
 
-
-# TODO
-# usd = [
-# ]
-
-# TODO
-# materialx = [
-# ]
+all = [
+    "QuiltiX[dev]",
+    "QuiltiX[plugins]",
+]
 
 
 [project.urls]

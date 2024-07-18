@@ -157,6 +157,8 @@ class QuiltiX_JSON_serializer:
             file_filter="JSON files (*.json)",
             mode="open",
         )
+        if not path:
+            return
 
         if not os.path.exists(path):
             logger.error("Cannot find input file: " + path)
