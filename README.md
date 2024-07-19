@@ -207,23 +207,23 @@ Below is a non-exhaustive list of install instructions for Hydra renderers.
 
 #### Arnold
 
-To use Arnold in QuiltiX we require 
-* [Arnold SDK](https://arnoldrenderer.com/download/#arnold-sdk)
+To use Arnold in QuiltiX you need the following:
+* Arnold SDK
 * A compiled version of [arnold-usd](https://github.com/Autodesk/arnold-usd)
 
 
 <details>
   <summary>Full Arnold install instructions</summary>
 
-The SDK (v7.2.1.0) can be downloaded from [here](https://arnoldrenderer.com/download/product-download/?id=5408). Extract it to a favoured directory.  
-<!-- To install a compiled version of arnold-usd one can download it from [here](#TODO)(v7.2.1.0) or install from [source](https://github.com/Autodesk/arnold-usd) -->
-To install arnold-usd one can build from source [here](https://github.com/Autodesk/arnold-usd). Hopefully soon, we will be able to provide a seperate download for arnold-usd ourselves. See [here](https://github.com/PrismPipeline/QuiltiX/issues/36) for more info.
+Arnold SDK download instructions can be found [here](https://help.autodesk.com/view/ARNOL/ENU/?guid=arnold_user_guide_ac_download_arnold_html#download-arnold-sdk).
+To install arnold-usd one can build from source [here](https://github.com/Autodesk/arnold-usd).
 
-Afterward couple of environment variables need to be set
-```shell
-set PATH=%PATH%;SDK_EXTRACT_DIR/bin
-set PXR_PLUGINPATH_NAME=%PXR_PLUGINPATH_NAME%;ARNOLD_USD_DIR/plugin
-``` 
+For Windows you can find a compiled version of `hdArnold` and the Arnold SDK [here](https://github.com/PrismPipeline/arnold-usd/releases/tag/v7.2.5.2) with [install instructions](https://github.com/PrismPipeline/arnold-usd/blob/0d97fa0af15600217036e32985ee0b7fe7a34051/README.md).  
+> This plugin can be used in USD applications, like QuiltiX, to add the Arnold Hydra delegate.
+> 
+> Download and extract the archive and then add the following paths to the environment:  
+> `Arnold/hdArnold/plugin` to `PXR_PLUGINPATH_NAME`  
+> `Arnold/Arnold-7.2.5.2-windows/bin` to `PATH`  
 
 </details>
 
