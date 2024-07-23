@@ -125,6 +125,7 @@ class QxNode(QxNodeBase):
             return
 
         self.change_type(mx_def_type)
+        self.complete_outputs_on_mx_node(mx_node)
         self.set_properties_from_mx_node(mx_node)
 
     def add_type_property(self, current_type_name=None):
@@ -423,7 +424,23 @@ class QxNode(QxNodeBase):
         # name = self.get_mx_input_name_from_property_name(name)
         super().create_property(name, value, items, range, widget_type, tab)
 
+    def complete_outputs_on_mx_node(self, mx_node):
+
+        # Handle with node outputs are not explicitly specified on
+        # a multioutput node. Note that this must be done
+        # before the qx_node is created and before connections are made.
+        if mx_node.getType() == "multioutput":
+            mx_node_def = mx_node.getNodeDef()
+            if mx_node_def:
+                for mx_output in mx_node_def.getActiveOutputs():
+                    mx_output_name = mx_output.getName()
+                    if not mx_node.getOutput(mx_output_name):
+                        mx_output_type = mx_output.getType()
+                        mx_node.addOutput(mx_output_name, mx_output_type)
+
+
     def set_properties_from_mx_node(self, mx_node):
+
         for mx_input in mx_node.getActiveInputs():
             mx_input_value = mx_input.getValue()
             mx_input_name = mx_input.getName()
