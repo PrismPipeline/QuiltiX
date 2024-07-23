@@ -6,6 +6,9 @@ import sys
 import webbrowser
 from importlib import metadata
 
+logging.basicConfig()
+logging.root.setLevel("DEBUG")
+
 # Setup plugin manager here before we import a lot of the modules
 from QuiltiX import qx_plugin
 
@@ -48,10 +51,7 @@ from QuiltiX.constants import ROOT
 from QuiltiX.qx_node_property import PropertiesBinWidget
 from QuiltiX.qx_nodegraph import QxNodeGraph
 
-logging.basicConfig()
-logging.root.setLevel("DEBUG")
 logger = logging.getLogger(__name__)
-
 
 class QuiltiXWindow(QMainWindow):
     def __init__(self, load_style_sheet=True, load_shaderball=True, load_default_graph=True):
