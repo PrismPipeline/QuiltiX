@@ -620,7 +620,8 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                             )
                             mx_node = qx_node_ids_to_mx_nodes[node_id]
                             if mx_node.getType() == "multioutput":
-                                output = mx_node.getActiveOutput(connection["out"][1])
+                                connection_name = f"{output_data['name']}"
+                                output = mx_node.getActiveOutput(connection_name)
                                 main_mx_node_graph_output.setConnectedOutput(output)
                             else:
                                 main_mx_node_graph_output.setConnectedNode(mx_node)
