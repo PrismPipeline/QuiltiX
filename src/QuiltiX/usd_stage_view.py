@@ -27,6 +27,16 @@ class StageViewWidget(QWidget):
         self.model.viewSettings.showHUD = False
 
         self.view = StageView(dataModel=self.model)
+
+        # [usdviewq] Workaround apparent PySide6 GL bug https://github.com/PixarAnimationStudios/OpenUSD/commit/abb175da3587d3e21111f0d0b753fb2dd965d7dc
+        from OpenGL import GL
+        oldPaintGL = StageView.paintGL
+        def paintGLFix(self):
+            GL.glDepthMask(GL.GL_TRUE)
+            oldPaintGL(self)
+
+        StageView.paintGL = paintGLFix
+
         self.view.orig_handleRendererChanged = self.view._handleRendererChanged
         self.view._handleRendererChanged = self._handleRendererChanged
 
