@@ -458,6 +458,8 @@ class QxNode(QxNodeBase):
                         mx_input_value = [v.strip() for v in mx_input_value.split(",")]
 
                     mx_input_value = tuple(mx_input_value)
+                elif mx_input_type == "filename":
+                    mx_input_value = mx_input.getResolvedValueString()
 
                 property_name = self.get_property_name_from_mx_input(
                     mx_input_name
