@@ -942,6 +942,12 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
         create_ports=True
     ):
         name = name or mx_node.getName()
+        if not pos and mx_node.hasAttribute("xpos") and mx_node.hasAttribute("ypos"):
+            pos = [
+                float(mx_node.getAttribute("xpos")) / constants.NODEGRAPH_NODE_POSITION_SERIALIZATION_SCALE,
+                float(mx_node.getAttribute("ypos")) / constants.NODEGRAPH_NODE_POSITION_SERIALIZATION_SCALE
+                ]
+
         qx_node = self.create_node(
             "Other.QxGroupNode",
             name=name,
