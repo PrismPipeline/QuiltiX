@@ -213,7 +213,7 @@ class QxNode(QxNodeBase):
         for mx_input in self.current_mx_def.getActiveInputs():
             color = self._random_color_from_string(mx_input.getType())
             self.add_input(mx_input.getName(), color=color)
-            self.create_property_from_mx_input(mx_input)
+            self.__class__.create_property_from_mx_input(mx_input, self)
 
         for mx_output in self.current_mx_def.getActiveOutputs():
             # TODO: actively chose colors instead of random
@@ -223,8 +223,8 @@ class QxNode(QxNodeBase):
 
         self.refresh_port_tooltips()
 
-    def create_property_from_mx_input(self, mx_input, node=None):
-        node = node or self
+    @classmethod
+    def create_property_from_mx_input(cls, mx_input, node):
         mx_input_value = mx_input.getValue()
         mx_input_name = mx_input.getName()
         mx_input_type = mx_input.getType()
@@ -246,7 +246,7 @@ class QxNode(QxNodeBase):
             mx_input_value = [i for i in mx_input_value]
 
         # TODO: actively chose colors instead of random
-        widget_type = self.get_widget_type_from_mx_type(mx_input_type)
+        widget_type = cls.get_widget_type_from_mx_type(mx_input_type)
         if mx_input_type == "float":
             if mx_input_value is None:
                 mx_input_value = 0
@@ -279,7 +279,7 @@ class QxNode(QxNodeBase):
             if mx_input_value is None:
                 mx_input_value = ""
 
-        property_name = self.get_property_name_from_mx_input(mx_input_name)
+        property_name = cls.get_property_name_from_mx_input(node, mx_input_name)
         node.create_property(
             property_name, mx_input_value, widget_type=widget_type, range=value_range
         )

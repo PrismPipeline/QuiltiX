@@ -177,10 +177,10 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                 ng_node.add_output(output.getName(), color=color)
 
             for minput in node.current_mx_def.getActiveInputs():
-                widget_type = qx_node_module.QxNode.get_widget_type_from_mx_type(minput.getType())
-                node.create_property_from_mx_input(minput, node=ng_node)
+                qx_node_module.QxNode.create_property_from_mx_input(minput, ng_node)
                 color = qx_node_module.QxNodeBase._random_color_from_string(str(minput.getType()))
-                ng_node.add_input(minput.getName(), color=color)
+                in_port = ng_node.add_input(minput.getName(), color=color)
+                in_port.view.setToolTip(minput.getType())
 
             qx_node_to_mx_node = {}
             had_pos = False
@@ -875,6 +875,13 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                 else:
                     logger.warning("invalid in port: {mx_input_name}")
 
+            if mx_input.hasInterfaceName():
+                intf_name = mx_input.getInterfaceName()
+                port_node = qx_node.graph.get_input_port_nodes()[0]
+                out_port = port_node.get_output(intf_name)
+                qx_input_port = qx_node.get_input(mx_input.getName())
+                out_port.connect_to(qx_input_port)
+
     def connect_qx_ng_ports_from_mx_ng(self, ng_node, mx_ng, mx_def):
         out_port_node = ng_node.get_sub_graph().get_output_port_nodes()[0]
         for in_port in out_port_node.input_ports():
@@ -964,8 +971,10 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                 qx_node.add_output(output.getName(), color=color)
 
             for minput in mx_node.getInputs():
+                qx_node_module.QxNode.create_property_from_mx_input(minput, qx_node)
                 color = qx_node_module.QxNodeBase._random_color_from_string(str(minput.getType()))
-                qx_node.add_input(minput.getName(), color=color)
+                in_port = qx_node.add_input(minput.getName(), color=color)
+                in_port.view.setToolTip(minput.getType())
             
         self.expand_group_node(qx_node)
         return qx_node
