@@ -572,6 +572,13 @@ class QxNodeGraph(NodeGraphQt.NodeGraph):
                     else:
                         continue
 
+                if node_data["type_"] == "Material.Surfacematerial" and input_data["name"] == "backsurfaceshader":
+                    for connection in serialized_data.get("connections", []):
+                        if connection["in"][0] == node_id and connection["in"][1] == "backsurfaceshader":
+                            break
+                    else:
+                        continue
+
                 if not hasGeomProp or isConnected:
                     mx_input = mx_node.addInput(input_data["name"], mx_input_type)
                     if not hasGeomProp:
