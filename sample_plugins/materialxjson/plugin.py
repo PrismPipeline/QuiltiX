@@ -32,7 +32,6 @@ from QuiltiX import constants, qx_plugin
 has_materialxjsoncore = True
 
 try:
-    #from materialxjson import core as jsoncore
     import materialxjson.core as jsoncore
     logger.info("materialxjson.core module loaded successfully")
 except ImportError:
