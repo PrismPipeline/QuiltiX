@@ -3,6 +3,8 @@
 import logging
 import os
 
+logger = logging.getLogger(__name__)
+
 # Optional syntax highlighting if pygments is installed
 have_highliting = True
 try:
@@ -14,21 +16,28 @@ except ImportError:
 
 from typing import TYPE_CHECKING
 
-from qtpy import QtCore  # type: ignore
-from qtpy.QtWidgets import (  # type: ignore
-    QAction,
-    QTextEdit,
-)
+
+def load_qt_modules():
+    global QtCore, QAction, QTextEdit
+    try:
+        from qtpy import QtCore  # type: ignore
+        from qtpy.QtWidgets import QAction, QTextEdit  # type: ignore
+        logger.info("qtpy modules loaded successfully")
+    except ImportError as e:
+        logger.error(f"Failed to import qtpy modules: {e}")
+        raise
+
 from QuiltiX import constants, qx_plugin
 
-logger = logging.getLogger(__name__)
 has_materialxjsoncore = True
 
 try:
+    #from materialxjson import core as jsoncore
     import materialxjson.core as jsoncore
+    logger.info("materialxjson.core module loaded successfully")
 except ImportError:
     has_materialxjsoncore = False
-    logger.error("materialxjson.core module not found")
+    logger.error("materialxjson.core module failed to load.")
 
 if TYPE_CHECKING:
     from QuiltiX import quiltix
@@ -194,6 +203,7 @@ class QuiltiX_JSON_serializer:
 
 @qx_plugin.hookimpl
 def after_ui_init(editor: "quiltix.QuiltiXWindow"):
+    load_qt_modules()
     editor.json_serializer = QuiltiX_JSON_serializer(editor, constants.ROOT)
 
 
